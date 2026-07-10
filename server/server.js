@@ -20,8 +20,16 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Initialize Clerk Express Middleware globally
-app.use(clerkMiddleware());
+// Initialize Clerk Express Middleware safely (won't crash on JWKS/token mismatch during deployment)
+app.use((req, res, next) => {
+  clerkMiddleware()(req, res, (err) => {
+    if (err) {
+      console.warn("Clerk verification/handshake warning (falling back to flexibleAuth):", err.message);
+      return next();
+    }
+    next();
+  });
+});
 
 // Routes
 app.use('/api/health', healthRoutes);
