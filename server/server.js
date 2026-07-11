@@ -15,7 +15,7 @@ const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 
 // Middleware
 app.use(cors({
-  origin: CLIENT_URL,
+  origin: true, // Dynamically allows the incoming request Origin (e.g. https://auditflow-nine.vercel.app or localhost)
   credentials: true
 }));
 app.use(express.json());
