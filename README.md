@@ -363,3 +363,6 @@ AI-Investment-Research-Agent
 # Conclusion
 
 This project demonstrates how modern AI frameworks such as **LangGraph.js** and **LangChain.js** can be integrated with a **React + Express + PostgreSQL** architecture to build an explainable AI-powered investment research platform. The application emphasizes modular design, scalable architecture, secure data management with PostgreSQL and Prisma ORM, transparent AI reasoning, and responsible AI-assisted software development.
+
+GITHUB-LINK : https://github.com/Sunny-Saurya/AuditFlow
+LIVE-LINK: https://auditflow-nine.vercel.app/
