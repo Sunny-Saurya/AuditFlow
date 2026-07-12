@@ -5,6 +5,8 @@ import mongoose from 'mongoose';
 import { clerkMiddleware } from '@clerk/express';
 import healthRoutes from './routes/health.routes.js';
 import researchRoutes from './routes/research.routes.js';
+import authRoutes from './routes/auth.routes.js';
+import { initPostgres } from './db/postgres.js';
 
 dotenv.config();
 
@@ -15,16 +17,16 @@ const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 
 // Middleware
 app.use(cors({
-  origin: true, // Dynamically allows the incoming request Origin (e.g. https://auditflow-nine.vercel.app or localhost)
+  origin: true,
   credentials: true
 }));
 app.use(express.json());
 
-// Initialize Clerk Express Middleware safely (won't crash on JWKS/token mismatch during deployment)
+// Initialize Clerk Express Middleware safely
 app.use((req, res, next) => {
   clerkMiddleware()(req, res, (err) => {
     if (err) {
-      console.warn("Clerk verification/handshake warning (falling back to flexibleAuth):", err.message);
+      console.warn("Clerk verification/handshake warning:", err.message);
       return next();
     }
     next();
@@ -34,8 +36,18 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/health', healthRoutes);
 app.use('/api/research', researchRoutes);
+app.use('/api/auth', authRoutes);
 
-// Database Connection
+// Initialize PostgreSQL (Neon) Database
+initPostgres().then((connected) => {
+  if (connected) {
+    console.log('PostgreSQL (Neon DB) is active and tables are verified.');
+  } else {
+    console.warn('PostgreSQL initialization skipped or offline.');
+  }
+});
+
+// Database Connection (MongoDB optional fallback)
 if (MONGODB_URI) {
   mongoose.connect(MONGODB_URI, { serverSelectionTimeoutMS: 3000 })
     .then(() => {
@@ -43,7 +55,7 @@ if (MONGODB_URI) {
     })
     .catch((err) => {
       console.error('Error connecting to MongoDB:', err.message);
-      console.warn('Backend will continue running in in-memory dev mode.');
+      console.warn('Backend will continue running in PostgreSQL / in-memory mode.');
     });
 } else {
   console.warn('WARNING: MONGODB_URI environment variable is missing. MongoDB connection skipped.');

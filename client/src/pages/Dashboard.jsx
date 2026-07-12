@@ -310,50 +310,52 @@ const Dashboard = () => {
 
             {/* Instant Live Stock Measurement & Analysis Card right below search box */}
             {selectedStockPreview && !loading && (
-              <div className="bg-gradient-to-br from-white via-amber-50/20 to-white rounded-3xl p-8 border border-amber-200/60 shadow-lg space-y-5 animate-fadeIn">
-                <div className="flex items-center justify-between">
+              <div className="bg-[#111827] text-white rounded-2xl p-7 border border-neutral-800 shadow-2xl space-y-5 animate-fadeIn">
+                <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
                   <div className="flex items-center space-x-2">
-                    <span className="w-2 h-2 rounded-full bg-green-500 animate-ping" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-amber-700">Instant Measurement & Analysis</span>
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-neutral-400">Algorithmic Measurement Node</span>
                   </div>
-                  <span className="bg-black text-white text-[10px] font-black px-2.5 py-1 rounded-md uppercase tracking-wider">{selectedStockPreview.exchange}</span>
+                  <span className="bg-neutral-900 text-neutral-300 border border-neutral-700 text-[10px] font-mono font-bold px-2.5 py-1 rounded uppercase tracking-wider">{selectedStockPreview.exchange}</span>
                 </div>
 
                 <div>
-                  <div className="flex items-baseline space-x-2">
-                    <h3 className="text-2xl font-black text-black tracking-tight">{selectedStockPreview.symbol}</h3>
-                    <span className="text-sm font-extrabold text-gray-500">{selectedStockPreview.name}</span>
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <div className="flex items-baseline space-x-3">
+                      <h3 className="text-3xl font-mono font-black text-white tracking-tight">{selectedStockPreview.symbol}</h3>
+                      <span className="text-sm font-extrabold text-neutral-300 truncate">{selectedStockPreview.name}</span>
+                    </div>
+                    <span className="text-[11px] font-mono font-bold text-amber-400 bg-neutral-900 border border-neutral-800 px-2.5 py-1 rounded">{selectedStockPreview.sector}</span>
                   </div>
-                  <span className="inline-block text-[11px] font-bold text-gray-600 bg-gray-100 px-2.5 py-0.5 rounded-full mt-1.5">{selectedStockPreview.sector}</span>
                 </div>
 
                 {/* Quantitative Measurement Grid */}
                 <div className="grid grid-cols-3 gap-3">
-                  <div className="bg-white/80 border border-gray-200/60 rounded-2xl p-3.5 text-center shadow-sm">
-                    <div className="text-[9px] font-extrabold text-gray-400 uppercase tracking-wider">Quality Score</div>
-                    <div className="text-xl font-black text-black mt-0.5">{selectedStockPreview.qualityScore}<span className="text-xs text-gray-400">/100</span></div>
+                  <div className="bg-neutral-900/80 border border-neutral-800 rounded-xl p-3 text-center">
+                    <div className="text-[9px] font-mono font-bold text-neutral-400 uppercase tracking-wider">Quality Score</div>
+                    <div className="text-xl font-mono font-black text-emerald-400 mt-0.5">{selectedStockPreview.qualityScore}<span className="text-xs text-neutral-500">/100</span></div>
                   </div>
-                  <div className="bg-white/80 border border-gray-200/60 rounded-2xl p-3.5 text-center shadow-sm">
-                    <div className="text-[9px] font-extrabold text-gray-400 uppercase tracking-wider">Est. P/E Ratio</div>
-                    <div className="text-xl font-black text-black mt-0.5">{selectedStockPreview.pe}</div>
+                  <div className="bg-neutral-900/80 border border-neutral-800 rounded-xl p-3 text-center">
+                    <div className="text-[9px] font-mono font-bold text-neutral-400 uppercase tracking-wider">Est. P/E Ratio</div>
+                    <div className="text-xl font-mono font-black text-white mt-0.5">{selectedStockPreview.pe}</div>
                   </div>
-                  <div className="bg-white/80 border border-gray-200/60 rounded-2xl p-3.5 text-center shadow-sm">
-                    <div className="text-[9px] font-extrabold text-gray-400 uppercase tracking-wider">Market Cap</div>
-                    <div className="text-lg font-black text-black mt-0.5 truncate">{selectedStockPreview.marketCap}</div>
+                  <div className="bg-neutral-900/80 border border-neutral-800 rounded-xl p-3 text-center">
+                    <div className="text-[9px] font-mono font-bold text-neutral-400 uppercase tracking-wider">Market Cap</div>
+                    <div className="text-lg font-mono font-black text-white mt-0.5 truncate">{selectedStockPreview.marketCap}</div>
                   </div>
                 </div>
 
                 {/* Qualitative Snapshot Analysis */}
-                <div className="bg-white/90 border border-gray-200/60 rounded-2xl p-4 shadow-sm space-y-2">
+                <div className="bg-neutral-900/50 border border-neutral-800/80 rounded-xl p-4 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-wider">Initial Analyst Assessment</span>
-                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                      selectedStockPreview.rating.includes('Buy') ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-amber-100 text-amber-800 border border-amber-200'
+                    <span className="text-[10px] font-mono font-bold text-neutral-400 uppercase tracking-wider">Analyst Thesis Snapshot</span>
+                    <span className={`text-[10px] font-mono font-extrabold px-2.5 py-0.5 rounded border uppercase tracking-wider ${
+                      selectedStockPreview.rating.includes('Buy') ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/30' : 'bg-amber-950/80 text-amber-300 border-amber-500/30'
                     }`}>
                       {selectedStockPreview.rating}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-700 font-medium leading-relaxed">
+                  <p className="text-xs text-neutral-300 font-medium leading-relaxed">
                     {selectedStockPreview.analysisSnapshot}
                   </p>
                 </div>
@@ -361,10 +363,10 @@ const Dashboard = () => {
                 <div className="pt-1">
                   <button
                     onClick={() => handleRunResearch()}
-                    className="w-full bg-neutral-900 hover:bg-black text-white py-3 text-xs font-black tracking-wider rounded-xl uppercase transition shadow-md flex items-center justify-center space-x-2"
+                    className="w-full bg-emerald-500 hover:bg-emerald-400 text-black py-3.5 text-xs font-black tracking-wider rounded-xl uppercase transition shadow-lg flex items-center justify-center space-x-2"
                   >
-                    <span>Generate Complete LangGraph Audit Report ({selectedStockPreview.symbol})</span>
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <span>Execute Full LangGraph Audit Report ({selectedStockPreview.symbol})</span>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
                   </button>

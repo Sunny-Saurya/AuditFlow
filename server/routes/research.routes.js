@@ -2,35 +2,40 @@ import express from 'express';
 import ResearchReport from '../models/research.model.js';
 import { researchAgent } from '../services/agent.js';
 import mongoose from 'mongoose';
+import { saveUser, saveReportToPostgres, getReportsFromPostgres, getReportByIdFromPostgres, isPostgresConnected } from '../db/postgres.js';
 
 const router = express.Router();
 
-// Fallback in-memory store when MongoDB is offline
+// Fallback in-memory store when databases are offline
 const inMemoryReports = [];
 
 // Dev-safe auth middleware: extracts userId from the Clerk session token
-// (set by clerkMiddleware) or falls back to decoding the Bearer JWT payload.
-// This avoids requireAuth() which redirects on failure and breaks the API.
+// or falls back to decoding Bearer JWT or guest evaluator token.
 const flexibleAuth = () => {
-  return (req, res, next) => {
-    // First, check if clerkMiddleware already populated req.auth
+  return async (req, res, next) => {
+    let userId = 'dev-user';
     if (req.auth && req.auth.userId) {
-      return next();
-    }
-
-    // Fallback: extract userId from the Bearer token payload
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.split(' ')[1];
-      try {
-        const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-        req.auth = { userId: payload.sub || payload.userId || 'dev-user' };
-      } catch {
-        req.auth = { userId: 'dev-user' };
-      }
+      userId = req.auth.userId;
     } else {
-      req.auth = { userId: 'dev-user' };
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.split(' ')[1];
+        if (token === 'guest-evaluator-token') {
+          userId = 'guest-evaluator';
+        } else {
+          try {
+            const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+            userId = payload.sub || payload.userId || 'dev-user';
+          } catch {
+            userId = 'dev-user';
+          }
+        }
+      }
     }
+    req.auth = { userId };
+
+    // Automatically save/track this user in PostgreSQL Neon DB
+    await saveUser({ userId, role: userId === 'guest-evaluator' ? 'evaluator' : 'user' });
     next();
   };
 };
@@ -45,12 +50,13 @@ router.post('/', flexibleAuth(), async (req, res, next) => {
   }
 
   try {
-    // Invoke the LangGraph agent
     const finalState = await researchAgent.invoke({ 
       symbol: symbol.toUpperCase() 
     });
 
+    const reportId = new mongoose.Types.ObjectId().toString();
     const reportData = {
+      _id: reportId,
       symbol: finalState.symbol,
       companyName: finalState.companyName,
       summary: finalState.summary,
@@ -64,46 +70,63 @@ router.post('/', flexibleAuth(), async (req, res, next) => {
       auditTrail: finalState.auditTrail
     };
 
-    // If MongoDB is connected (readyState === 1), use MongoDB; otherwise, fallback to in-memory store
+    // 1. Save to PostgreSQL (Primary relational store for user auditability & reporting)
+    const pgReport = await saveReportToPostgres({ ...reportData, userId });
+
+    // 2. Save to MongoDB if online
     if (mongoose.connection.readyState === 1) {
-      const report = new ResearchReport({
-        userId,
+      try {
+        const report = new ResearchReport({
+          _id: reportId,
+          userId,
+          ...reportData
+        });
+        await report.save();
+      } catch (mongoErr) {
+        console.warn('MongoDB save error (PostgreSQL already saved):', mongoErr.message);
+      }
+    } else {
+      inMemoryReports.push({ ...reportData, userId, createdAt: new Date() });
+    }
+
+    if (pgReport) {
+      return res.status(201).json({
+        _id: pgReport.id,
+        userId: pgReport.user_id,
         ...reportData
       });
-      await report.save();
-      res.status(201).json(report);
-    } else {
-      console.warn('MongoDB is offline. Saving report to in-memory store.');
-      const mockId = new mongoose.Types.ObjectId().toString();
-      const inMemoryReport = {
-        _id: mockId,
-        userId,
-        createdAt: new Date(),
-        ...reportData
-      };
-      inMemoryReports.push(inMemoryReport);
-      res.status(201).json(inMemoryReport);
     }
+
+    res.status(201).json({ _id: reportId, userId, ...reportData });
   } catch (err) {
     next(err);
   }
 });
 
-// Retrieve all research reports for the current Clerk user
+// Retrieve all research reports for the current user
 router.get('/', flexibleAuth(), async (req, res, next) => {
   const userId = req.auth.userId;
 
   try {
+    // Try PostgreSQL first
+    if (isPostgresConnected) {
+      const pgReports = await getReportsFromPostgres(userId);
+      if (pgReports !== null) {
+        return res.json(pgReports);
+      }
+    }
+
+    // Fallback to MongoDB
     if (mongoose.connection.readyState === 1) {
       const reports = await ResearchReport.find({ userId }).sort({ createdAt: -1 });
-      res.json(reports);
-    } else {
-      console.warn('MongoDB is offline. Fetching reports from in-memory store.');
-      const reports = inMemoryReports
-        .filter(r => r.userId === userId)
-        .sort((a, b) => b.createdAt - a.createdAt);
-      res.json(reports);
+      return res.json(reports);
     }
+
+    // Fallback to in-memory
+    const reports = inMemoryReports
+      .filter(r => r.userId === userId)
+      .sort((a, b) => b.createdAt - a.createdAt);
+    res.json(reports);
   } catch (err) {
     next(err);
   }
@@ -115,32 +138,30 @@ router.get('/:id', flexibleAuth(), async (req, res, next) => {
   const userId = req.auth.userId;
 
   try {
+    // Try PostgreSQL first
+    if (isPostgresConnected) {
+      const pgReport = await getReportByIdFromPostgres(id);
+      if (pgReport !== null) {
+        if (pgReport.userId !== userId) {
+          return res.status(403).json({ error: 'Unauthorized to view this report' });
+        }
+        return res.json(pgReport);
+      }
+    }
+
+    // Fallback to MongoDB
     if (mongoose.connection.readyState === 1) {
       const report = await ResearchReport.findById(id);
-      
-      if (!report) {
-        return res.status(404).json({ error: 'Report not found' });
-      }
-
-      if (report.userId !== userId) {
-        return res.status(403).json({ error: 'Unauthorized to view this report' });
-      }
-
-      res.json(report);
-    } else {
-      console.warn('MongoDB is offline. Fetching report detail from in-memory store.');
-      const report = inMemoryReports.find(r => r._id === id);
-      
-      if (!report) {
-        return res.status(404).json({ error: 'Report not found' });
-      }
-
-      if (report.userId !== userId) {
-        return res.status(403).json({ error: 'Unauthorized to view this report' });
-      }
-
-      res.json(report);
+      if (!report) return res.status(404).json({ error: 'Report not found' });
+      if (report.userId !== userId) return res.status(403).json({ error: 'Unauthorized to view this report' });
+      return res.json(report);
     }
+
+    // Fallback to in-memory
+    const report = inMemoryReports.find(r => r._id === id);
+    if (!report) return res.status(404).json({ error: 'Report not found' });
+    if (report.userId !== userId) return res.status(403).json({ error: 'Unauthorized to view this report' });
+    res.json(report);
   } catch (err) {
     next(err);
   }

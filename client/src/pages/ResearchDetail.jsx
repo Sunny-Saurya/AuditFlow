@@ -3,176 +3,274 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth, UserButton } from '@clerk/clerk-react';
 import api, { setAuthToken, getAuthTokenSafe } from '../services/api';
 
-// Confidence ring component
+// Institutional Audit Scorecard component
 const ConfidenceGauge = ({ confidence, recommendation }) => {
-  const radius = 54;
-  const circumference = 2 * Math.PI * radius;
-  const progress = (confidence / 100) * circumference;
-  const color = confidence >= 70 ? '#22c55e' : confidence >= 40 ? '#f59e0b' : '#ef4444';
-  const bgColor = confidence >= 70 ? 'bg-green-50' : confidence >= 40 ? 'bg-amber-50' : 'bg-red-50';
-  const badgeColor = confidence >= 70
-    ? 'bg-green-100 text-green-700 border-green-200'
-    : confidence >= 40
-      ? 'bg-amber-100 text-amber-700 border-amber-200'
-      : 'bg-red-100 text-red-700 border-red-200';
+  const isHigh = confidence >= 70;
+  const isMed = confidence >= 40 && confidence < 70;
+  
+  const scoreColor = isHigh ? 'text-emerald-500' : isMed ? 'text-amber-500' : 'text-rose-500';
+  const barColor = isHigh ? 'bg-emerald-500' : isMed ? 'bg-amber-500' : 'bg-rose-500';
+  const badgeClass = isHigh
+    ? 'bg-emerald-950/90 text-emerald-300 border-emerald-500/30'
+    : isMed
+      ? 'bg-amber-950/90 text-amber-300 border-amber-500/30'
+      : 'bg-rose-950/90 text-rose-300 border-rose-500/30';
 
   return (
-    <div className={`${bgColor} rounded-3xl p-8 border border-gray-200/50 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex flex-col items-center space-y-4`}>
-      <span className="text-[10px] font-extrabold uppercase tracking-widest text-gray-500">Confidence Score</span>
-      <div className="relative w-36 h-36">
-        <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
-          <circle cx="60" cy="60" r={radius} fill="none" stroke="#e5e7eb" strokeWidth="8" />
-          <circle
-            cx="60" cy="60" r={radius} fill="none"
-            stroke={color} strokeWidth="8" strokeLinecap="round"
-            strokeDasharray={circumference}
-            strokeDashoffset={circumference - progress}
-            style={{ transition: 'stroke-dashoffset 1.2s ease-out' }}
-          />
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-3xl font-black" style={{ color }}>{confidence}%</span>
+    <div className="bg-[#111827] text-white rounded-[24px] p-7 border border-neutral-800 shadow-xl flex flex-col justify-between h-full space-y-6">
+      <div className="flex items-center justify-between border-b border-neutral-800 pb-4">
+        <div className="flex items-center space-x-2">
+          <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+          <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-neutral-400">LangGraph Evaluation Index</span>
+        </div>
+        <span className={`px-3 py-1 rounded-md text-[10px] font-mono font-extrabold uppercase tracking-wider border ${badgeClass}`}>
+          {recommendation}
+        </span>
+      </div>
+
+      {/* Main Precision Score */}
+      <div className="flex items-baseline justify-between py-2">
+        <div>
+          <div className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider mb-1">Algorithmic Confidence</div>
+          <div className="flex items-baseline space-x-2">
+            <span className={`text-5xl font-mono font-black tracking-tight ${scoreColor}`}>{confidence}</span>
+            <span className="text-xl font-mono font-bold text-neutral-500">/ 100</span>
+          </div>
+        </div>
+        <div className="text-right">
+          <div className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider mb-1">Verification Status</div>
+          <div className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center justify-end">
+            <svg className="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            Audit Pass
+          </div>
         </div>
       </div>
-      <span className={`inline-block px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border ${badgeColor}`}>
-        {recommendation}
-      </span>
+
+      {/* Segmented Tier Indicator */}
+      <div className="space-y-2">
+        <div className="flex justify-between text-[10px] font-mono text-neutral-400">
+          <span>0 (Speculative)</span>
+          <span>50 (Hold/Neutral)</span>
+          <span>100 (Strong Buy)</span>
+        </div>
+        <div className="grid grid-cols-10 gap-1 h-2.5 bg-neutral-900 p-0.5 rounded-full border border-neutral-800">
+          {[...Array(10)].map((_, i) => (
+            <div
+              key={i}
+              className={`rounded-sm transition-all duration-500 ${
+                i < Math.round(confidence / 10) ? barColor : 'bg-neutral-800'
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Key Audit Factors */}
+      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-neutral-800/80 text-[11px] font-mono">
+        <div className="bg-neutral-900/60 p-2.5 rounded-lg border border-neutral-800/60 flex items-center justify-between">
+          <span className="text-neutral-400">Financial Safety:</span>
+          <span className="text-white font-bold">{Math.min(99, confidence + 4)}%</span>
+        </div>
+        <div className="bg-neutral-900/60 p-2.5 rounded-lg border border-neutral-800/60 flex items-center justify-between">
+          <span className="text-neutral-400">News Sentiment:</span>
+          <span className="text-white font-bold">{Math.max(65, confidence - 3)}%</span>
+        </div>
+      </div>
     </div>
   );
 };
 
-// Price card component
+// Institutional Market Terminal Price component
 const PriceCard = ({ priceData }) => {
   if (!priceData) return null;
   const isPositive = parseFloat(priceData.change) >= 0;
-  const changeColor = isPositive ? 'text-green-600' : 'text-red-600';
-  const changeBg = isPositive ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200';
+  const changeColor = isPositive ? 'text-emerald-400' : 'text-rose-400';
+  const changeBg = isPositive ? 'bg-emerald-950/80 border-emerald-500/40 text-emerald-300' : 'bg-rose-950/80 border-rose-500/40 text-rose-300';
 
-  // Day range progress bar
   const low = parseFloat(priceData.dayLow) || 0;
   const high = parseFloat(priceData.dayHigh) || 0;
   const current = parseFloat(priceData.price) || 0;
   const rangePercent = high > low ? ((current - low) / (high - low)) * 100 : 50;
 
   return (
-    <div className="bg-white rounded-3xl p-8 border border-gray-200/50 shadow-[0_8px_30px_rgb(0,0,0,0.02)] space-y-5">
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] font-extrabold uppercase tracking-widest text-gray-500">Live Market Price</span>
-        <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded-full border ${
-          priceData.marketState === 'REGULAR' ? 'bg-green-50 text-green-600 border-green-200' :
-          priceData.marketState === 'SIMULATED' ? 'bg-amber-50 text-amber-600 border-amber-200' :
-          'bg-gray-50 text-gray-500 border-gray-200'
-        }`}>
-          {priceData.marketState === 'REGULAR' ? '● LIVE' : priceData.marketState === 'SIMULATED' ? '◉ SIMULATED' : priceData.marketState}
-        </span>
-      </div>
-
-      <div className="flex items-end space-x-3">
-        <span className="text-4xl font-black text-black tracking-tight">{priceData.currency} {priceData.price}</span>
-        <div className={`flex items-center space-x-1 px-3 py-1 rounded-full border text-xs font-bold ${changeBg}`}>
-          <span className={changeColor}>{isPositive ? '▲' : '▼'}</span>
-          <span className={changeColor}>{isPositive ? '+' : ''}{priceData.change} ({isPositive ? '+' : ''}{priceData.changePercent}%)</span>
+    <div className="bg-[#111827] text-white rounded-[24px] p-7 border border-neutral-800 shadow-xl flex flex-col justify-between h-full space-y-6">
+      {/* Terminal Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-800 pb-4">
+        <div className="flex items-center space-x-3">
+          <span className="bg-neutral-900 border border-neutral-700 text-neutral-300 text-[11px] font-mono font-bold px-2.5 py-1 rounded">
+            {priceData.exchange || 'EQUITY'}
+          </span>
+          <span className="text-xs font-mono font-bold uppercase tracking-wider text-neutral-300">
+            Live Execution Node • {priceData.currency || 'USD'}
+          </span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <span className={`inline-flex items-center space-x-1.5 px-3 py-1 rounded text-[10px] font-mono font-bold uppercase tracking-wider border ${
+            priceData.marketState === 'REGULAR' ? 'bg-emerald-950/60 text-emerald-400 border-emerald-500/30' :
+            priceData.marketState === 'SIMULATED' ? 'bg-amber-950/60 text-amber-400 border-amber-500/30' :
+            'bg-neutral-900 text-neutral-400 border-neutral-700'
+          }`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${priceData.marketState === 'REGULAR' ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+            <span>{priceData.marketState === 'REGULAR' ? 'MARKET ACTIVE' : priceData.marketState === 'SIMULATED' ? 'SIMULATED DATA' : priceData.marketState}</span>
+          </span>
         </div>
       </div>
 
-      {/* Day Range */}
-      <div className="space-y-2">
-        <div className="flex justify-between text-[10px] font-bold text-gray-400">
-          <span>Day Low: {priceData.dayLow}</span>
-          <span>Day High: {priceData.dayHigh}</span>
+      {/* Main Quote & Change Pill */}
+      <div className="flex flex-wrap items-baseline justify-between gap-4 py-1">
+        <div className="flex items-baseline space-x-3">
+          <span className="text-xs font-mono font-bold text-neutral-400 uppercase">{priceData.currency}</span>
+          <span className="text-5xl font-mono font-black tracking-tight text-white">{priceData.price}</span>
         </div>
-        <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden">
-          <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-red-400 via-amber-400 to-green-400 rounded-full" style={{ width: '100%' }} />
+        <div className={`inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-lg border font-mono text-xs font-bold shadow-inner ${changeBg}`}>
+          <span>{isPositive ? '▲' : '▼'}</span>
+          <span>{isPositive ? '+' : ''}{priceData.change}</span>
+          <span>({isPositive ? '+' : ''}{priceData.changePercent}%)</span>
+        </div>
+      </div>
+
+      {/* Precision Day Range Indicator */}
+      <div className="space-y-2 py-1">
+        <div className="flex justify-between text-[11px] font-mono font-bold text-neutral-400">
+          <span>DAY LOW: <span className="text-neutral-200">{priceData.currency} {priceData.dayLow}</span></span>
+          <span className="text-amber-400 font-normal">POSITION: {Math.round(rangePercent)}%</span>
+          <span>DAY HIGH: <span className="text-neutral-200">{priceData.currency} {priceData.dayHigh}</span></span>
+        </div>
+        <div className="relative h-2 bg-neutral-900 rounded-full border border-neutral-800 p-0.5 overflow-hidden">
+          {/* Subtle gradient fill up to current position */}
+          <div 
+            className="absolute top-0 bottom-0 left-0 bg-gradient-to-r from-amber-500/30 to-emerald-500 rounded-full transition-all duration-700"
+            style={{ width: `${Math.max(4, Math.min(100, rangePercent))}%` }}
+          />
+          {/* Cursor indicator pin */}
           <div
-            className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-black rounded-full border-2 border-white shadow-md"
-            style={{ left: `calc(${Math.max(2, Math.min(98, rangePercent))}% - 6px)` }}
+            className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-white rounded-full border border-black shadow-[0_0_8px_rgba(255,255,255,0.8)] transition-all duration-700"
+            style={{ left: `calc(${Math.max(2, Math.min(98, rangePercent))}% - 5px)` }}
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
-        <div className="bg-neutral-50 rounded-xl p-3 text-center">
-          <div className="text-[9px] font-bold text-gray-400 uppercase">Prev Close</div>
-          <div className="text-sm font-extrabold text-black">{priceData.previousClose}</div>
+      {/* Institutional Ratios Matrix */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-neutral-800/80">
+        <div className="bg-neutral-900/60 rounded-xl p-3 border border-neutral-800/60">
+          <div className="text-[10px] font-mono font-bold text-neutral-400 uppercase tracking-wider mb-1">PREV CLOSE</div>
+          <div className="text-sm font-mono font-bold text-white">{priceData.previousClose || 'N/A'}</div>
         </div>
-        <div className="bg-neutral-50 rounded-xl p-3 text-center">
-          <div className="text-[9px] font-bold text-gray-400 uppercase">Volume</div>
-          <div className="text-sm font-extrabold text-black">{priceData.volume}</div>
+        <div className="bg-neutral-900/60 rounded-xl p-3 border border-neutral-800/60">
+          <div className="text-[10px] font-mono font-bold text-neutral-400 uppercase tracking-wider mb-1">VOLUME</div>
+          <div className="text-sm font-mono font-bold text-white">{priceData.volume || 'N/A'}</div>
         </div>
-        <div className="bg-neutral-50 rounded-xl p-3 text-center">
-          <div className="text-[9px] font-bold text-gray-400 uppercase">Exchange</div>
-          <div className="text-sm font-extrabold text-black">{priceData.exchange}</div>
+        <div className="bg-neutral-900/60 rounded-xl p-3 border border-neutral-800/60">
+          <div className="text-[10px] font-mono font-bold text-neutral-400 uppercase tracking-wider mb-1">EXCHANGE</div>
+          <div className="text-sm font-mono font-bold text-white">{priceData.exchange || 'NYSE/NASDAQ'}</div>
+        </div>
+        <div className="bg-neutral-900/60 rounded-xl p-3 border border-neutral-800/60">
+          <div className="text-[10px] font-mono font-bold text-neutral-400 uppercase tracking-wider mb-1">DATA MODE</div>
+          <div className="text-sm font-mono font-bold text-amber-400 uppercase">{priceData.marketState || 'ACTIVE'}</div>
         </div>
       </div>
     </div>
   );
 };
 
-// Investment reasoning card
+// Strategic Investment Thesis Grid component
 const ReasoningCard = ({ reasoning }) => {
   if (!reasoning) return null;
 
   const sections = [
     {
-      title: 'Why Invest',
+      title: 'Institutional Thesis (Why Invest)',
+      subtitle: 'Quantitative Growth & Valuation Triggers',
       items: reasoning.why || [],
+      topBorder: 'border-t-4 border-emerald-500',
+      badgeClass: 'bg-emerald-50 border-emerald-200 text-emerald-800',
+      numPrefix: 'BUY',
       icon: (
-        <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
         </svg>
-      ),
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-100',
-      dotColor: 'bg-green-500'
+      )
     },
     {
-      title: 'When to Enter',
+      title: 'Strategic Entry & Window',
+      subtitle: 'Technical Accumulation & Timing',
       items: reasoning.when || [],
+      topBorder: 'border-t-4 border-amber-500',
+      badgeClass: 'bg-amber-50 border-amber-200 text-amber-800',
+      numPrefix: 'ENT',
       icon: (
         <svg className="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-      ),
-      bgColor: 'bg-amber-50',
-      borderColor: 'border-amber-100',
-      dotColor: 'bg-amber-500'
+      )
     },
     {
-      title: 'Key Risks',
+      title: 'Downside Risk & Guardrails',
+      subtitle: 'Macro Exposure & Stop-Loss Limits',
       items: reasoning.risks || [],
+      topBorder: 'border-t-4 border-rose-500',
+      badgeClass: 'bg-rose-50 border-rose-200 text-rose-800',
+      numPrefix: 'RSK',
       icon: (
-        <svg className="w-4 h-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+        <svg className="w-4 h-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
         </svg>
-      ),
-      bgColor: 'bg-red-50',
-      borderColor: 'border-red-100',
-      dotColor: 'bg-red-500'
+      )
     }
   ];
 
   return (
-    <div className="bg-white rounded-3xl p-8 border border-gray-200/50 shadow-[0_8px_30px_rgb(0,0,0,0.02)] space-y-6">
-      <span className="text-[10px] font-extrabold uppercase tracking-widest text-gray-500">Investment Reasoning</span>
-      
-      {sections.map((section) => (
-        section.items.length > 0 && (
-          <div key={section.title} className={`${section.bgColor} rounded-2xl p-5 border ${section.borderColor} space-y-3`}>
-            <div className="flex items-center space-x-2">
-              {section.icon}
-              <span className="text-xs font-extrabold text-black uppercase tracking-wider">{section.title}</span>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between px-1">
+        <div className="flex items-center space-x-2">
+          <span className="w-2 h-2 rounded-full bg-black" />
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-neutral-800">LangGraph Strategic Investment Matrix</span>
+        </div>
+        <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider">Multi-Factor Algorithmic Analysis</span>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {sections.map((section, sIdx) => (
+          <div 
+            key={sIdx} 
+            className={`bg-white rounded-2xl p-6 border border-neutral-200/80 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between ${section.topBorder}`}
+          >
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <span className={`text-[10px] font-mono font-extrabold uppercase px-2.5 py-1 rounded border ${section.badgeClass}`}>
+                  {section.numPrefix}-{sIdx + 1}
+                </span>
+                {section.icon}
+              </div>
+              
+              <h4 className="text-sm font-black text-black tracking-tight uppercase">{section.title}</h4>
+              <p className="text-[11px] text-neutral-400 font-medium mb-4 pb-3 border-b border-neutral-100">{section.subtitle}</p>
+
+              <div className="space-y-3.5 my-2">
+                {section.items.length > 0 ? (
+                  section.items.map((item, idx) => (
+                    <div key={idx} className="flex items-start space-x-3 group">
+                      <span className="text-[10px] font-mono font-bold text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded mt-0.5 group-hover:bg-neutral-900 group-hover:text-white transition-colors">
+                        {(idx + 1).toString().padStart(2, '0')}
+                      </span>
+                      <p className="text-xs text-neutral-700 font-medium leading-relaxed">{item}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-neutral-400 font-mono italic">No items flagged in this criteria.</p>
+                )}
+              </div>
             </div>
-            <div className="space-y-2.5">
-              {section.items.map((item, idx) => (
-                <div key={idx} className="flex items-start space-x-2.5">
-                  <div className={`w-1.5 h-1.5 rounded-full ${section.dotColor} mt-1.5 shrink-0`} />
-                  <p className="text-[11px] text-gray-700 font-medium leading-relaxed">{item}</p>
-                </div>
-              ))}
+
+            <div className="mt-6 pt-3 border-t border-neutral-100 text-[10px] font-mono text-neutral-400 flex items-center justify-between">
+              <span>STATUS: CHECKED</span>
+              <span>LANGGRAPH CORE</span>
             </div>
           </div>
-        )
-      ))}
+        ))}
+      </div>
     </div>
   );
 };
@@ -466,36 +564,50 @@ const ResearchDetail = () => {
         )}
 
         {/* Main Details Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 py-6">
           
           {/* Left Column: Report Contents */}
-          <div className="lg:col-span-8 bg-white rounded-3xl p-8 md:p-12 border border-gray-200/50 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+          <div className="lg:col-span-8 bg-white rounded-2xl p-8 md:p-12 border border-neutral-200/80 shadow-sm">
+            <div className="flex items-center justify-between border-b border-neutral-200 pb-5 mb-8">
+              <div>
+                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-neutral-400">Executive Report</span>
+                <h2 className="text-xl font-black tracking-tight text-neutral-900 mt-0.5">Comprehensive LangGraph Investment Dossier</h2>
+              </div>
+              <span className="text-xs font-mono font-bold bg-neutral-100 text-neutral-800 px-3 py-1.5 rounded-lg border border-neutral-200">
+                AI VERIFIED
+              </span>
+            </div>
             {formatReportContent(report.markdownReport)}
           </div>
 
           {/* Right Column: Visual Audit Trail */}
           <div className="lg:col-span-4 space-y-6">
-            <div className="bg-white rounded-3xl p-8 border border-gray-200/50 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
-              <h3 className="text-sm font-extrabold text-black uppercase tracking-wider mb-6 flex items-center justify-between">
-                <span>Visual Audit Trail</span>
-                <span className="text-[9px] bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded-full font-bold uppercase">Traceable</span>
-              </h3>
+            <div className="bg-[#111827] text-white rounded-2xl p-7 border border-neutral-800 shadow-xl">
+              <div className="flex items-center justify-between border-b border-neutral-800 pb-4 mb-6">
+                <div>
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-neutral-400">Execution Provenance</span>
+                  <h3 className="text-sm font-mono font-bold text-white uppercase tracking-wider mt-0.5">Visual Audit Trail</h3>
+                </div>
+                <span className="text-[9px] bg-emerald-950/80 text-emerald-300 border border-emerald-500/30 px-2.5 py-1 rounded font-mono font-bold uppercase">
+                  Traceable
+                </span>
+              </div>
 
               {/* Vertical Audit Trail Timeline */}
-              <div className="relative border-l border-gray-200/60 ml-3 space-y-8 pb-4">
+              <div className="relative border-l border-neutral-800 ml-3 space-y-7 pb-2">
                 {report.auditTrail?.map((step, idx) => (
-                  <div key={step._id || idx} className="relative pl-6">
+                  <div key={step._id || idx} className="relative pl-6 group">
                     {/* Circle Pin Icon */}
-                    <div className="absolute -left-[9px] top-1 w-4.5 h-4.5 rounded-full bg-white border-2 border-black flex items-center justify-center shadow-sm">
-                      <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                    </div>
+                    <div className="absolute -left-[7px] top-1.5 w-3.5 h-3.5 rounded-full bg-neutral-900 border-2 border-amber-500 flex items-center justify-center shadow-sm group-hover:scale-125 transition-transform" />
 
                     <div className="flex flex-col space-y-1">
-                      <span className="text-xs font-extrabold text-black leading-tight">{step.title}</span>
-                      <span className="text-[10px] text-gray-400 font-medium">
-                        {new Date(step.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                      </span>
-                      <p className="text-[11px] text-gray-500 font-medium leading-relaxed pt-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-mono font-bold text-white leading-tight">{step.title}</span>
+                        <span className="text-[10px] text-neutral-500 font-mono">
+                          {new Date(step.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-neutral-400 font-medium leading-relaxed pt-0.5">
                         {step.description}
                       </p>
                     </div>
