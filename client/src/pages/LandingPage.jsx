@@ -1,8 +1,13 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
 
 const LandingPage = () => {
+  const navigate = useNavigate();
+  const handleGuestLogin = () => {
+    localStorage.setItem('auditflow_guest_mode', 'true');
+    navigate('/dashboard');
+  };
   return (
     <div className="min-h-screen bg-[#FAF9F6] text-[#111111] font-sans relative overflow-x-hidden select-none selection:bg-amber-100 selection:text-black">
       
@@ -73,6 +78,13 @@ const LandingPage = () => {
               <UserButton afterSignOutUrl="/" />
             </SignedIn>
             <SignedOut>
+              <button 
+                onClick={handleGuestLogin}
+                className="text-xs font-bold bg-amber-500 hover:bg-amber-600 text-black px-4 py-2.5 rounded-full shadow-sm hover:shadow transition flex items-center space-x-1"
+              >
+                <span>Guest Access</span>
+                <span className="text-[10px]">⚡</span>
+              </button>
               <Link to="/login" className="text-xs font-bold text-gray-700 hover:text-black transition-colors px-3 py-2">
                 Sign in
               </Link>
@@ -123,6 +135,12 @@ const LandingPage = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
               </Link>
+              <button 
+                onClick={handleGuestLogin}
+                className="bg-amber-500 hover:bg-amber-600 text-black transition-all duration-300 px-8 py-4 text-xs font-bold tracking-wider rounded-full shadow-md hover:shadow-xl hover:-translate-y-0.5 flex items-center space-x-2"
+              >
+                <span>TRY AS GUEST (INSTANT) ⚡</span>
+              </button>
               <a 
                 href="#learn-more" 
                 className="bg-white hover:bg-neutral-50 border border-black/15 text-black transition-all duration-300 px-8 py-4 text-xs font-bold tracking-wider rounded-full shadow-sm hover:shadow-md hover:-translate-y-0.5"

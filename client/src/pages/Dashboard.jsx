@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth, UserButton } from '@clerk/clerk-react';
 import { Link, useNavigate } from 'react-router-dom';
-import api, { setAuthToken } from '../services/api';
+import api, { setAuthToken, getAuthTokenSafe } from '../services/api';
 import { STOCKS_DATABASE } from '../services/stocksDatabase';
 
 const Dashboard = () => {
   const { getToken } = useAuth();
   const navigate = useNavigate();
+  const isGuest = localStorage.getItem('auditflow_guest_mode') === 'true';
   
   const [symbol, setSymbol] = useState('');
   const [selectedStockPreview, setSelectedStockPreview] = useState(null);
@@ -34,7 +35,7 @@ const Dashboard = () => {
   // Fetch past reports
   const fetchReports = async () => {
     try {
-      const token = await getToken();
+      const token = await getAuthTokenSafe(getToken);
       setAuthToken(token);
       const res = await api.get('/api/research');
       setReports(res.data);
@@ -141,7 +142,7 @@ const Dashboard = () => {
     setLoading(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await getAuthTokenSafe(getToken);
       setAuthToken(token);
       const res = await api.post('/api/research', { symbol: symbol.trim() });
       setReports(prev => [res.data, ...prev]);
@@ -197,7 +198,25 @@ const Dashboard = () => {
           </nav>
 
           <div className="flex items-center space-x-4">
-            <UserButton afterSignOutUrl="/" />
+            {isGuest ? (
+              <div className="flex items-center space-x-3 bg-amber-50 border border-amber-200 px-3.5 py-1.5 rounded-full">
+                <span className="text-amber-800 text-[11px] font-black uppercase tracking-wider flex items-center">
+                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse mr-1.5" />
+                  Evaluator Mode
+                </span>
+                <button
+                  onClick={() => {
+                    localStorage.removeItem('auditflow_guest_mode');
+                    navigate('/');
+                  }}
+                  className="text-[11px] font-extrabold text-gray-500 hover:text-red-600 transition pl-2 border-l border-amber-200"
+                >
+                  Exit Guest
+                </button>
+              </div>
+            ) : (
+              <UserButton afterSignOutUrl="/" />
+            )}
           </div>
         </header>
 

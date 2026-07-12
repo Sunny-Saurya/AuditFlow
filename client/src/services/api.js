@@ -5,11 +5,27 @@ const api = axios.create({
 });
 
 export const setAuthToken = (token) => {
-  if (token) {
-    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  const finalToken = token || (localStorage.getItem('auditflow_guest_mode') === 'true' ? 'guest-evaluator-token' : null);
+  if (finalToken) {
+    api.defaults.headers.common['Authorization'] = `Bearer ${finalToken}`;
   } else {
     delete api.defaults.headers.common['Authorization'];
   }
+};
+
+export const getAuthTokenSafe = async (getTokenFunc) => {
+  try {
+    if (getTokenFunc) {
+      const token = await getTokenFunc();
+      if (token) return token;
+    }
+  } catch (err) {
+    // Ignore clerk token errors when offline or guest
+  }
+  if (localStorage.getItem('auditflow_guest_mode') === 'true') {
+    return 'guest-evaluator-token';
+  }
+  return null;
 };
 
 export default api;
