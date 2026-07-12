@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth, UserButton } from '@clerk/clerk-react';
 import api, { setAuthToken, getAuthTokenSafe } from '../services/api';
 
-// Institutional Audit Scorecard component
+
 const ConfidenceGauge = ({ confidence, recommendation }) => {
   const isHigh = confidence >= 70;
   const isMed = confidence >= 40 && confidence < 70;
@@ -28,7 +28,7 @@ const ConfidenceGauge = ({ confidence, recommendation }) => {
         </span>
       </div>
 
-      {/* Main Precision Score */}
+      
       <div className="flex items-baseline justify-between py-2">
         <div>
           <div className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider mb-1">Algorithmic Confidence</div>
@@ -48,7 +48,7 @@ const ConfidenceGauge = ({ confidence, recommendation }) => {
         </div>
       </div>
 
-      {/* Segmented Tier Indicator */}
+      
       <div className="space-y-2">
         <div className="flex justify-between text-[10px] font-mono text-neutral-400">
           <span>0 (Speculative)</span>
@@ -67,7 +67,7 @@ const ConfidenceGauge = ({ confidence, recommendation }) => {
         </div>
       </div>
 
-      {/* Key Audit Factors */}
+      
       <div className="grid grid-cols-2 gap-2 pt-2 border-t border-neutral-800/80 text-[11px] font-mono">
         <div className="bg-neutral-900/60 p-2.5 rounded-lg border border-neutral-800/60 flex items-center justify-between">
           <span className="text-neutral-400">Financial Safety:</span>
@@ -82,7 +82,7 @@ const ConfidenceGauge = ({ confidence, recommendation }) => {
   );
 };
 
-// Institutional Market Terminal Price component
+
 const PriceCard = ({ priceData }) => {
   if (!priceData) return null;
   const isPositive = parseFloat(priceData.change) >= 0;
@@ -96,7 +96,7 @@ const PriceCard = ({ priceData }) => {
 
   return (
     <div className="bg-[#111827] text-white rounded-[24px] p-7 border border-neutral-800 shadow-xl flex flex-col justify-between h-full space-y-6">
-      {/* Terminal Header */}
+      
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-800 pb-4">
         <div className="flex items-center space-x-3">
           <span className="bg-neutral-900 border border-neutral-700 text-neutral-300 text-[11px] font-mono font-bold px-2.5 py-1 rounded">
@@ -118,7 +118,7 @@ const PriceCard = ({ priceData }) => {
         </div>
       </div>
 
-      {/* Main Quote & Change Pill */}
+      
       <div className="flex flex-wrap items-baseline justify-between gap-4 py-1">
         <div className="flex items-baseline space-x-3">
           <span className="text-xs font-mono font-bold text-neutral-400 uppercase">{priceData.currency}</span>
@@ -131,7 +131,7 @@ const PriceCard = ({ priceData }) => {
         </div>
       </div>
 
-      {/* Precision Day Range Indicator */}
+      
       <div className="space-y-2 py-1">
         <div className="flex justify-between text-[11px] font-mono font-bold text-neutral-400">
           <span>DAY LOW: <span className="text-neutral-200">{priceData.currency} {priceData.dayLow}</span></span>
@@ -139,12 +139,12 @@ const PriceCard = ({ priceData }) => {
           <span>DAY HIGH: <span className="text-neutral-200">{priceData.currency} {priceData.dayHigh}</span></span>
         </div>
         <div className="relative h-2 bg-neutral-900 rounded-full border border-neutral-800 p-0.5 overflow-hidden">
-          {/* Subtle gradient fill up to current position */}
+          
           <div 
             className="absolute top-0 bottom-0 left-0 bg-gradient-to-r from-amber-500/30 to-emerald-500 rounded-full transition-all duration-700"
             style={{ width: `${Math.max(4, Math.min(100, rangePercent))}%` }}
           />
-          {/* Cursor indicator pin */}
+          
           <div
             className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-white rounded-full border border-black shadow-[0_0_8px_rgba(255,255,255,0.8)] transition-all duration-700"
             style={{ left: `calc(${Math.max(2, Math.min(98, rangePercent))}% - 5px)` }}
@@ -152,7 +152,7 @@ const PriceCard = ({ priceData }) => {
         </div>
       </div>
 
-      {/* Institutional Ratios Matrix */}
+      
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-neutral-800/80">
         <div className="bg-neutral-900/60 rounded-xl p-3 border border-neutral-800/60">
           <div className="text-[10px] font-mono font-bold text-neutral-400 uppercase tracking-wider mb-1">PREV CLOSE</div>
@@ -175,7 +175,7 @@ const PriceCard = ({ priceData }) => {
   );
 };
 
-// Strategic Investment Thesis Grid component
+
 const ReasoningCard = ({ reasoning }) => {
   if (!reasoning) return null;
 
@@ -303,7 +303,7 @@ const ResearchDetail = () => {
     fetchReportDetail();
   }, [id]);
 
-  // Parse JSON fields safely
+  
   const getPriceData = () => {
     try {
       return typeof report.currentPrice === 'string' ? JSON.parse(report.currentPrice) : report.currentPrice;
@@ -316,7 +316,7 @@ const ResearchDetail = () => {
     } catch { return null; }
   };
 
-  // Clean custom markdown-like formatter
+  
   const formatReportContent = (markdown) => {
     if (!markdown) return null;
     const lines = markdown.split('\n');
@@ -328,7 +328,7 @@ const ResearchDetail = () => {
     lines.forEach((line, index) => {
       const trimmed = line.trim();
 
-      // Check Table
+      
       if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
         inTable = true;
         const parts = trimmed.split('|').map(s => s.trim()).filter((s, i, arr) => i > 0 && i < arr.length - 1);
@@ -344,7 +344,7 @@ const ResearchDetail = () => {
         }
         return;
       } else if (inTable) {
-        // Table closed
+        
         elements.push(
           <div key={`table-${index}`} className="my-6 overflow-x-auto rounded-2xl border border-gray-200/60 shadow-sm bg-white">
             <table className="min-w-full divide-y divide-gray-200">
@@ -379,7 +379,7 @@ const ResearchDetail = () => {
       } else if (trimmed.startsWith('### ')) {
         elements.push(<h3 key={index} className="text-sm md:text-base font-extrabold text-neutral-800 tracking-tight mt-6 mb-2 leading-tight">{trimmed.substring(4)}</h3>);
       } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-        // Format bold prefix if exists in list like - **P/E Ratio**: value
+        
         let content = trimmed.substring(2);
         const boldRegex = /\*\*(.*?)\*\*/g;
         const matches = [...content.matchAll(boldRegex)];
@@ -403,7 +403,7 @@ const ResearchDetail = () => {
           </div>
         );
       } else if (trimmed) {
-        // Parse bold elements in standard paragraphs
+        
         let content = trimmed;
         const boldRegex = /\*\*(.*?)\*\*/g;
         const matches = [...content.matchAll(boldRegex)];
@@ -484,7 +484,7 @@ const ResearchDetail = () => {
   return (
     <div className="min-h-screen bg-[#FAF9F6] text-[#111111] font-sans relative overflow-x-hidden selection:bg-amber-100 selection:text-black">
       
-      {/* Background ambient glows */}
+      
       <div className="absolute top-0 left-0 right-0 h-full pointer-events-none overflow-hidden z-0">
         <div className="absolute -top-[10%] -left-[10%] w-[55%] h-[55%] rounded-full bg-gradient-to-br from-amber-100/30 to-transparent blur-[120px]" />
         <div className="absolute top-[20%] -right-[10%] w-[50%] h-[50%] rounded-full bg-gradient-to-bl from-amber-100/20 to-transparent blur-[100px]" />
@@ -492,7 +492,7 @@ const ResearchDetail = () => {
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 py-6 flex flex-col min-h-screen">
         
-        {/* Header */}
+        
         <header className="flex items-center justify-between py-4 border-b border-gray-200/40">
           <Link to="/" className="flex items-center space-x-2 group">
             <div className="w-8 h-8 rounded-lg bg-white shadow-sm border border-gray-200/60 flex items-center justify-center p-1.5 transition-all duration-300 group-hover:shadow group-hover:scale-105">
@@ -532,7 +532,7 @@ const ResearchDetail = () => {
           </div>
         </header>
 
-        {/* Action Header */}
+        
         <div className="py-6 flex items-center justify-between">
           <button 
             onClick={() => navigate('/dashboard')}
@@ -545,7 +545,7 @@ const ResearchDetail = () => {
           </button>
         </div>
 
-        {/* Top Cards Row: Confidence + Price */}
+        
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <ConfidenceGauge 
             confidence={report.confidence || 0} 
@@ -556,17 +556,17 @@ const ResearchDetail = () => {
           </div>
         </div>
 
-        {/* Investment Reasoning */}
+        
         {reasoning && (
           <div className="mb-8">
             <ReasoningCard reasoning={reasoning} />
           </div>
         )}
 
-        {/* Main Details Layout */}
+        
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 py-6">
           
-          {/* Left Column: Report Contents */}
+          
           <div className="lg:col-span-8 bg-white rounded-2xl p-8 md:p-12 border border-neutral-200/80 shadow-sm">
             <div className="flex items-center justify-between border-b border-neutral-200 pb-5 mb-8">
               <div>
@@ -580,7 +580,7 @@ const ResearchDetail = () => {
             {formatReportContent(report.markdownReport)}
           </div>
 
-          {/* Right Column: Visual Audit Trail */}
+          
           <div className="lg:col-span-4 space-y-6">
             <div className="bg-[#111827] text-white rounded-2xl p-7 border border-neutral-800 shadow-xl">
               <div className="flex items-center justify-between border-b border-neutral-800 pb-4 mb-6">
@@ -593,11 +593,11 @@ const ResearchDetail = () => {
                 </span>
               </div>
 
-              {/* Vertical Audit Trail Timeline */}
+              
               <div className="relative border-l border-neutral-800 ml-3 space-y-7 pb-2">
                 {report.auditTrail?.map((step, idx) => (
                   <div key={step._id || idx} className="relative pl-6 group">
-                    {/* Circle Pin Icon */}
+                    
                     <div className="absolute -left-[7px] top-1.5 w-3.5 h-3.5 rounded-full bg-neutral-900 border-2 border-amber-500 flex items-center justify-center shadow-sm group-hover:scale-125 transition-transform" />
 
                     <div className="flex flex-col space-y-1">

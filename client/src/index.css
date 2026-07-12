@@ -9,14 +9,14 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Headings use Space Grotesk */
+  
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Space Grotesk', sans-serif !important;
   }
 }
 
 @layer utilities {
-  /* Custom scrollbar */
+  
   .custom-scrollbar::-webkit-scrollbar {
     width: 4px;
   }
@@ -31,14 +31,14 @@
     background: #a3a3a3;
   }
 
-  /* Glassmorphism utility */
+  
   .glass {
     background: rgba(255, 255, 255, 0.6);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
   }
 
-  /* Smooth hover lift */
+  
   .hover-lift {
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
   }
@@ -47,7 +47,7 @@
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
   }
 
-  /* Gradient text */
+  
   .text-gradient {
     background: linear-gradient(135deg, #111 0%, #555 100%);
     -webkit-background-clip: text;
@@ -56,7 +56,7 @@
   }
 }
 
-/* Smooth page transitions */
+
 #root {
   animation: fadeIn 0.4s ease-out;
 }
@@ -66,9 +66,23 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Focus ring style */
+
 *:focus-visible {
   outline: 2px solid #111;
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 20s linear infinite;
+}
+
+.animate-spin-reverse-slow {
+  animation: spinSlow 20s linear infinite reverse;
+}
+

@@ -3,7 +3,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import axios from "axios";
 import { STOCKS_DATABASE } from "./stocksDatabase.js";
 
-// Define the State structure using LangGraph Annotation API
+
 const AgentState = Annotation.Root({
   symbol: Annotation({
     reducer: (x, y) => y,
@@ -51,14 +51,14 @@ const AgentState = Annotation.Root({
   })
 });
 
-// Helper for logger step
+
 const createStep = (title, description) => ({
   title,
   description,
   timestamp: new Date()
 });
 
-// Node 1: Fetch Financials
+
 const fetchFinancialsNode = async (state) => {
   const symbol = state.symbol;
   const auditLogs = [createStep("Financial Data Gathering", `Initiating API lookup for ticker symbol ${symbol}`)];
@@ -66,7 +66,7 @@ const fetchFinancialsNode = async (state) => {
   let financials = null;
   let companyName = symbol;
 
-  // Check if Alpha Vantage API key or similar is present, otherwise fallback to mock
+  
   if (process.env.ALPHA_VANTAGE_API_KEY && process.env.ALPHA_VANTAGE_API_KEY !== "your_api_key_here") {
     try {
       const response = await axios.get(`https://www.alphavantage.co/query?function=OVERVIEW&symbol=${symbol}&apikey=${process.env.ALPHA_VANTAGE_API_KEY}`);
@@ -87,7 +87,7 @@ const fetchFinancialsNode = async (state) => {
     }
   }
 
-  // Fallback Mock Financials if real API fails or isn't configured
+  
   if (!financials) {
     const matchedStock = STOCKS_DATABASE.find(
       s => s.symbol.toUpperCase() === symbol.toUpperCase() || s.name.toLowerCase().includes(symbol.toLowerCase())
@@ -120,7 +120,7 @@ const fetchFinancialsNode = async (state) => {
   };
 };
 
-// Node 2: Fetch Real-Time Stock Price (Yahoo Finance — no API key required)
+
 const fetchPriceNode = async (state) => {
   const symbol = state.symbol;
   const auditLogs = [createStep("Real-Time Price Fetch", `Querying Yahoo Finance for live market data on ${symbol}`)];
@@ -162,7 +162,7 @@ const fetchPriceNode = async (state) => {
     console.warn("Yahoo Finance API failed, falling back to mock price.", err.message);
   }
 
-  // Fallback mock price
+  
   if (!priceData) {
     const mockPrice = (80 + Math.random() * 400).toFixed(2);
     const mockPrevClose = (parseFloat(mockPrice) * (0.97 + Math.random() * 0.06)).toFixed(2);
@@ -190,13 +190,13 @@ const fetchPriceNode = async (state) => {
   };
 };
 
-// Node 3: Fetch News Sentiment
+
 const fetchNewsNode = async (state) => {
   const symbol = state.symbol;
   const auditLogs = [createStep("News & Web Scanning", `Running search queries to scan market sentiment for ${symbol}`)];
   let newsList = [];
 
-  // Check for Tavily Search API key, otherwise fallback to mock
+  
   if (process.env.TAVILY_API_KEY && process.env.TAVILY_API_KEY !== "your_tavily_api_key_here") {
     try {
       const response = await axios.post("https://api.tavily.com/search", {
@@ -218,7 +218,7 @@ const fetchNewsNode = async (state) => {
     }
   }
 
-  // Fallback Mock News
+  
   if (newsList.length === 0) {
     newsList = [
       {
@@ -249,12 +249,12 @@ const fetchNewsNode = async (state) => {
   };
 };
 
-// Confidence scoring algorithm
+
 const computeConfidence = (financials, news, currentPrice) => {
-  let score = 50; // Start at neutral
+  let score = 50; 
   const reasons = { why: [], when: [], risks: [] };
 
-  // --- P/E Ratio Analysis (25 points max) ---
+  
   const pe = parseFloat(financials.PE);
   if (!isNaN(pe)) {
     if (pe < 15) {
@@ -272,7 +272,7 @@ const computeConfidence = (financials, news, currentPrice) => {
     }
   }
 
-  // --- PEG Ratio Analysis (25 points max) ---
+  
   const peg = parseFloat(financials.PEG);
   if (!isNaN(peg)) {
     if (peg < 1.0) {
@@ -290,7 +290,7 @@ const computeConfidence = (financials, news, currentPrice) => {
     }
   }
 
-  // --- Profit Margin Analysis (25 points max) ---
+  
   const margin = parseFloat(financials.profitMargin);
   if (!isNaN(margin)) {
     if (margin > 20) {
@@ -308,7 +308,7 @@ const computeConfidence = (financials, news, currentPrice) => {
     }
   }
 
-  // --- News Sentiment (25 points max) ---
+  
   const positiveNews = news.filter(n => n.sentiment === "positive" || (!n.sentiment && n.snippet?.toLowerCase().includes("beat"))).length;
   const negativeNews = news.filter(n => n.sentiment === "negative" || (!n.sentiment && n.snippet?.toLowerCase().includes("concern"))).length;
   
@@ -323,7 +323,7 @@ const computeConfidence = (financials, news, currentPrice) => {
     reasons.risks.push(`Bearish news flow — ${negativeNews} negative signals outweigh ${positiveNews} positive, suggesting caution.`);
   }
 
-  // --- Price Momentum ---
+  
   if (currentPrice) {
     const changePercent = parseFloat(currentPrice.changePercent);
     if (!isNaN(changePercent)) {
@@ -339,16 +339,16 @@ const computeConfidence = (financials, news, currentPrice) => {
     }
   }
 
-  // Add timing recommendations
+  
   if (reasons.when.length === 0) {
     reasons.when.push("Consider a phased entry strategy (dollar-cost averaging) over the next 2–4 weeks to manage volatility risk.");
   }
   reasons.when.push("Set a stop-loss at 8–10% below your entry price to limit downside exposure.");
 
-  // Clamp score to 0–100
+  
   score = Math.max(0, Math.min(100, score));
 
-  // Determine recommendation
+  
   let recommendation;
   if (score >= 70) {
     recommendation = "BUY";
@@ -364,19 +364,19 @@ const computeConfidence = (financials, news, currentPrice) => {
   return { score, recommendation, reasons };
 };
 
-// Node 4: Synthesize Markdown Report
+
 const synthesizeReportNode = async (state) => {
   const { symbol, companyName, financials, news, currentPrice } = state;
   const auditLogs = [createStep("Report Compilation", `Running LangChain synthesis to format financial data and news`)];
   
-  // Compute confidence and recommendation
+  
   const { score: confidence, recommendation, reasons } = computeConfidence(financials, news, currentPrice);
   auditLogs.push(createStep("Confidence Analysis", `Computed investment confidence: ${confidence}% → ${recommendation}`));
 
   let reportContent = "";
   let summary = "";
 
-  // Check if OpenAI key is present, otherwise fallback to mock generator
+  
   if (process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== "your_openai_api_key_here") {
     try {
       const llm = new ChatOpenAI({
@@ -422,7 +422,7 @@ const synthesizeReportNode = async (state) => {
     }
   }
 
-  // Fallback Mock Report
+  
   if (!reportContent) {
     const priceChangeSign = parseFloat(currentPrice?.change) >= 0 ? '+' : '';
     summary = `${companyName} (${symbol}): ${recommendation} with ${confidence}% confidence. Trading at ${currentPrice?.currency} ${currentPrice?.price} (${priceChangeSign}${currentPrice?.changePercent}%).`;
@@ -497,7 +497,7 @@ ${reasons.risks.map(r => `- ${r}`).join("\n")}
   };
 };
 
-// Node 5: Review and Audit Trail
+
 const reviewNode = async (state) => {
   const auditLogs = [createStep("Audit Review", "Final review of research reports and confirmation of decision integrity completed.")];
   return {
@@ -505,7 +505,7 @@ const reviewNode = async (state) => {
   };
 };
 
-// Build the LangGraph Workflow
+
 const workflow = new StateGraph(AgentState)
   .addNode("fetchFinancials", fetchFinancialsNode)
   .addNode("fetchPrice", fetchPriceNode)
@@ -520,7 +520,7 @@ const workflow = new StateGraph(AgentState)
   .addEdge("synthesizeReport", "review")
   .addEdge("review", "__end__");
 
-// Compile the graph
+
 const researchAgent = workflow.compile();
 
 export { researchAgent };

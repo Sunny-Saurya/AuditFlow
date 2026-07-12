@@ -7,7 +7,7 @@ const stepSchema = new mongoose.Schema({
 });
 
 const researchReportSchema = new mongoose.Schema({
-  userId: { type: String, required: true }, // Clerk User ID
+  userId: { type: String, required: true }, 
   symbol: { type: String, required: true, uppercase: true },
   companyName: { type: String, required: true },
   summary: { type: String, required: true },
@@ -16,8 +16,8 @@ const researchReportSchema = new mongoose.Schema({
   markdownReport: { type: String, required: true },
   confidence: { type: Number, default: 0 },
   recommendation: { type: String, default: "HOLD" },
-  currentPrice: { type: String }, // JSON string of price data
-  investmentReasoning: { type: String }, // JSON string of {why, when, risks}
+  currentPrice: { type: String }, 
+  investmentReasoning: { type: String }, 
   auditTrail: [stepSchema],
   createdAt: { type: Date, default: Date.now }
 });

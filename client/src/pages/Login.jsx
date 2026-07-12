@@ -11,14 +11,14 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] text-[#111111] font-sans relative overflow-hidden flex flex-col justify-center items-center py-12 px-4 select-none">
-      {/* Background ambient glows */}
+      
       <div className="absolute top-0 left-0 right-0 h-full pointer-events-none overflow-hidden z-0">
         <div className="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] rounded-full bg-gradient-to-br from-amber-100/30 to-transparent blur-[120px]" />
         <div className="absolute bottom-[10%] -right-[10%] w-[50%] h-[50%] rounded-full bg-gradient-to-tr from-amber-100/30 to-transparent blur-[120px]" />
       </div>
 
       <div className="relative z-10 w-full max-w-md flex flex-col items-center">
-        {/* Logo */}
+        
         <Link to="/" className="flex items-center space-x-2 mb-6 group">
           <div className="w-8 h-8 rounded-lg bg-white shadow-sm border border-gray-200/60 flex items-center justify-center p-1.5 transition-all duration-300 group-hover:shadow group-hover:scale-105">
             <svg className="w-full h-full text-gray-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -28,7 +28,7 @@ const Login = () => {
           <span className="font-extrabold tracking-tight text-lg text-gray-900">auditflow</span>
         </Link>
 
-        {/* Instant Guest Evaluation Card */}
+        
         <div className="w-full mb-6 bg-gradient-to-br from-amber-500 to-amber-600 rounded-[24px] p-6 shadow-xl text-black border border-amber-400 flex flex-col items-center text-center">
           <span className="text-[10px] font-black uppercase tracking-widest bg-black/10 px-3 py-1 rounded-full mb-2">Evaluator Fast-Track</span>
           <h3 className="text-lg font-black tracking-tight">Testing or Evaluating Auditflow?</h3>
@@ -44,7 +44,7 @@ const Login = () => {
           </button>
         </div>
 
-        {/* Clerk Sign In component */}
+        
         <div className="shadow-2xl rounded-[28px] border border-gray-100/80 overflow-hidden bg-white">
           <SignIn 
             signUpUrl="/signup" 

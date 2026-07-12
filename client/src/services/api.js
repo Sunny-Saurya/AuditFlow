@@ -20,7 +20,7 @@ export const getAuthTokenSafe = async (getTokenFunc) => {
       if (token) return token;
     }
   } catch (err) {
-    // Ignore clerk token errors when offline or guest
+    
   }
   if (localStorage.getItem('auditflow_guest_mode') === 'true') {
     return 'guest-evaluator-token';

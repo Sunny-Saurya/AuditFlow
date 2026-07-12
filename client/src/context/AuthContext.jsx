@@ -8,15 +8,15 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // We will verify the token on mount in Prompt 2
+    
     if (token) {
-      setUser({ email: 'placeholder@example.com' }); // placeholder for health check
+      setUser({ email: 'placeholder@example.com' }); 
     }
     setLoading(false);
   }, [token]);
 
   const login = async (email, password) => {
-    // Will implement call to API in Prompt 2
+    
     const fakeToken = 'placeholder-jwt-token';
     const fakeUser = { email };
     localStorage.setItem('token', fakeToken);
@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signup = async (email, password) => {
-    // Will implement call to API in Prompt 2
+    
     const fakeToken = 'placeholder-jwt-token';
     const fakeUser = { email };
     localStorage.setItem('token', fakeToken);

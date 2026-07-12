@@ -12,13 +12,13 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Public Routes */}
+        
         <Route path="/" element={<LandingPage />} />
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         
-        {/* Protected Routes */}
+        
         <Route 
           path="/dashboard" 
           element={
@@ -36,7 +36,7 @@ function App() {
           } 
         />
 
-        {/* Catch-all redirect */}
+        
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

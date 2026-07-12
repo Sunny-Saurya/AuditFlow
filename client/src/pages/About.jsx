@@ -6,13 +6,13 @@ const About = () => {
   return (
     <div className="min-h-screen bg-[#FAF9F6] text-[#111111] font-sans relative overflow-x-hidden select-none selection:bg-amber-100 selection:text-black">
       
-      {/* Background Gradients */}
+      
       <div className="absolute top-0 left-0 right-0 h-full pointer-events-none overflow-hidden z-0">
         <div className="absolute -top-[10%] -left-[10%] w-[55%] h-[55%] rounded-full bg-gradient-to-br from-amber-100/40 via-yellow-100/25 to-transparent blur-[120px]" />
         <div className="absolute top-[30%] -right-[10%] w-[50%] h-[60%] rounded-full bg-gradient-to-bl from-amber-100/30 to-transparent blur-[100px]" />
       </div>
 
-      {/* Grid Pattern Overlay */}
+      
       <div 
         className="absolute inset-0 pointer-events-none z-0 opacity-[0.03]"
         style={{
@@ -26,7 +26,7 @@ const About = () => {
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 py-6 flex flex-col min-h-screen justify-between">
         
-        {/* Header */}
+        
         <header className="flex items-center justify-between py-4">
           <Link to="/" className="flex items-center space-x-2 group">
             <div className="w-8 h-8 rounded-lg bg-white shadow-sm border border-gray-200/60 flex items-center justify-center p-1.5 transition-all duration-300 group-hover:shadow group-hover:scale-105">
@@ -76,7 +76,7 @@ const About = () => {
           </div>
         </header>
 
-        {/* Content Section */}
+        
         <main className="my-auto py-16 flex flex-col space-y-12">
           
           <div className="max-w-3xl space-y-6">
@@ -93,10 +93,10 @@ const About = () => {
             </p>
           </div>
 
-          {/* Grid Layout of Core Features */}
+          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8">
             
-            {/* Tech Item 1 */}
+            
             <div className="bg-white rounded-3xl p-8 border border-gray-200/50 shadow-[0_8px_30px_rgb(0,0,0,0.02)] space-y-4">
               <div className="w-10 h-10 rounded-2xl bg-orange-50 border border-orange-100 flex items-center justify-center">
                 <span className="text-orange-600 font-bold text-xs">LG</span>
@@ -107,7 +107,7 @@ const About = () => {
               </p>
             </div>
 
-            {/* Tech Item 2 */}
+            
             <div className="bg-white rounded-3xl p-8 border border-gray-200/50 shadow-[0_8px_30px_rgb(0,0,0,0.02)] space-y-4">
               <div className="w-10 h-10 rounded-2xl bg-green-50 border border-green-100 flex items-center justify-center">
                 <span className="text-green-600 font-bold text-xs">CK</span>
@@ -118,7 +118,7 @@ const About = () => {
               </p>
             </div>
 
-            {/* Tech Item 3 */}
+            
             <div className="bg-white rounded-3xl p-8 border border-gray-200/50 shadow-[0_8px_30px_rgb(0,0,0,0.02)] space-y-4">
               <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center">
                 <span className="text-indigo-600 font-bold text-xs">AT</span>
@@ -132,7 +132,7 @@ const About = () => {
           </div>
         </main>
 
-        {/* Footer */}
+        
         <footer className="border-t border-gray-200/35 pt-8 pb-4 flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 text-gray-400">
           <div className="flex items-center space-x-8">
             <span className="text-[10px] font-extrabold tracking-wider uppercase">Our partners</span>

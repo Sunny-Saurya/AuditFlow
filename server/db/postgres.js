@@ -36,7 +36,7 @@ export const initPostgres = async () => {
     console.log('Connected to Neon PostgreSQL successfully!');
     isPostgresConnected = true;
 
-    // Create Users table
+    
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -50,7 +50,7 @@ export const initPostgres = async () => {
       ALTER TABLE users ADD COLUMN IF NOT EXISTS full_name VARCHAR(255);
     `);
 
-    // Create Research Reports table
+    
     await client.query(`
       CREATE TABLE IF NOT EXISTS research_reports (
         id VARCHAR(255) PRIMARY KEY,

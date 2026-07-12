@@ -15,14 +15,14 @@ const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI;
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 
-// Middleware
+
 app.use(cors({
   origin: true,
   credentials: true
 }));
 app.use(express.json());
 
-// Initialize Clerk Express Middleware safely
+
 app.use((req, res, next) => {
   clerkMiddleware()(req, res, (err) => {
     if (err) {
@@ -33,12 +33,12 @@ app.use((req, res, next) => {
   });
 });
 
-// Routes
+
 app.use('/api/health', healthRoutes);
 app.use('/api/research', researchRoutes);
 app.use('/api/auth', authRoutes);
 
-// Initialize PostgreSQL (Neon) Database
+
 initPostgres().then((connected) => {
   if (connected) {
     console.log('PostgreSQL (Neon DB) is active and tables are verified.');
@@ -47,7 +47,7 @@ initPostgres().then((connected) => {
   }
 });
 
-// Database Connection (MongoDB optional fallback)
+
 if (MONGODB_URI) {
   mongoose.connect(MONGODB_URI, { serverSelectionTimeoutMS: 3000 })
     .then(() => {
@@ -62,7 +62,7 @@ if (MONGODB_URI) {
 }
 
 
-// Global Error Handler
+
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
@@ -71,9 +71,9 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start Server
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
-// Server initialized
+

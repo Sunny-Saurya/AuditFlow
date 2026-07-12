@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth, UserButton } from '@clerk/clerk-react';
 import { Link, useNavigate } from 'react-router-dom';
 import api, { setAuthToken, getAuthTokenSafe } from '../services/api';
-import { STOCKS_DATABASE } from '../services/stocksDatabase';
+import { STOCKS_DATABASE, getSmartStockSuggestions } from '../services/stocksDatabase';
 
 const Dashboard = () => {
   const { getToken } = useAuth();
@@ -21,9 +21,9 @@ const Dashboard = () => {
   const [activeIndex, setActiveIndex] = useState(-1);
   const containerRef = useRef(null);
 
-  // Tab state between Research Reports and Stock Directory
-  const [activeTab, setActiveTab] = useState('reports'); // 'reports' or 'directory'
-  const [directoryFilter, setDirectoryFilter] = useState('ALL'); // 'ALL', 'US', 'NSE'
+  
+  const [activeTab, setActiveTab] = useState('reports'); 
+  const [directoryFilter, setDirectoryFilter] = useState('ALL'); 
 
   const stepsList = [
     { title: "Financial Data Gathering", desc: "Accessing Alpha Vantage APIs & Quantitative Engines..." },
@@ -32,7 +32,7 @@ const Dashboard = () => {
     { title: "Audit Trail Finalization", desc: "Writing execution logs and validating decision metrics..." }
   ];
 
-  // Fetch past reports
+  
   const fetchReports = async () => {
     try {
       const token = await getAuthTokenSafe(getToken);
@@ -49,7 +49,7 @@ const Dashboard = () => {
     fetchReports();
   }, []);
 
-  // Filter suggestions and measure stock when symbol changes
+  
   useEffect(() => {
     const term = symbol.trim().toLowerCase();
     if (!term) {
@@ -59,18 +59,16 @@ const Dashboard = () => {
       return;
     }
 
-    const filtered = STOCKS_DATABASE.filter(
-      item =>
-        item.symbol.toLowerCase().includes(term) ||
-        item.name.toLowerCase().includes(term) ||
-        item.sector.toLowerCase().includes(term)
-    );
+    const filtered = getSmartStockSuggestions(term);
     setFilteredSuggestions(filtered);
     setActiveIndex(-1);
 
-    // Instant measurement & analysis if exact or close match found
+    
     const exactMatch = STOCKS_DATABASE.find(
-      item => item.symbol.toLowerCase() === term || item.name.toLowerCase() === term
+      item => 
+        item.symbol.toLowerCase() === term || 
+        item.name.toLowerCase() === term ||
+        (item.keywords && item.keywords.some(k => k.toLowerCase() === term))
     ) || filtered[0];
 
     if (exactMatch) {
@@ -80,7 +78,7 @@ const Dashboard = () => {
     }
   }, [symbol]);
 
-  // Click outside to close dropdown
+  
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (containerRef.current && !containerRef.current.contains(event.target)) {
@@ -118,7 +116,7 @@ const Dashboard = () => {
     }
   };
 
-  // Handle agent loading simulation logs
+  
   useEffect(() => {
     let interval;
     if (loading) {
@@ -160,13 +158,13 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-[#FAF9F6] text-[#111111] font-sans relative overflow-x-hidden selection:bg-amber-100 selection:text-black">
       
-      {/* Ambient background glows */}
+      
       <div className="absolute top-0 left-0 right-0 h-full pointer-events-none overflow-hidden z-0">
         <div className="absolute -top-[10%] -left-[10%] w-[55%] h-[55%] rounded-full bg-gradient-to-br from-amber-100/30 to-transparent blur-[120px]" />
         <div className="absolute top-[20%] -right-[10%] w-[50%] h-[50%] rounded-full bg-gradient-to-bl from-amber-100/20 to-transparent blur-[100px]" />
       </div>
 
-      {/* Grid Pattern Overlay */}
+      
       <div 
         className="absolute inset-0 pointer-events-none z-0 opacity-[0.02]"
         style={{
@@ -180,7 +178,7 @@ const Dashboard = () => {
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 py-6 flex flex-col min-h-screen">
         
-        {/* Header */}
+        
         <header className="flex items-center justify-between py-4 border-b border-gray-200/40">
           <Link to="/" className="flex items-center space-x-2 group">
             <div className="w-8 h-8 rounded-lg bg-white shadow-sm border border-gray-200/60 flex items-center justify-center p-1.5 transition-all duration-300 group-hover:shadow group-hover:scale-105">
@@ -220,10 +218,10 @@ const Dashboard = () => {
           </div>
         </header>
 
-        {/* Dashboard Main Content */}
+        
         <main className="flex-grow py-12 grid grid-cols-1 lg:grid-cols-12 gap-12">
           
-          {/* Left Column: Control Panel & Live Measurement */}
+          
           <div className="lg:col-span-5 space-y-8">
             <div className="bg-white rounded-3xl p-8 border border-gray-200/50 shadow-[0_8px_30px_rgb(0,0,0,0.02)] space-y-6">
               <div>
@@ -308,7 +306,7 @@ const Dashboard = () => {
               )}
             </div>
 
-            {/* Instant Live Stock Measurement & Analysis Card right below search box */}
+            
             {selectedStockPreview && !loading && (
               <div className="bg-[#111827] text-white rounded-2xl p-7 border border-neutral-800 shadow-2xl space-y-5 animate-fadeIn">
                 <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
@@ -329,7 +327,7 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* Quantitative Measurement Grid */}
+                
                 <div className="grid grid-cols-3 gap-3">
                   <div className="bg-neutral-900/80 border border-neutral-800 rounded-xl p-3 text-center">
                     <div className="text-[9px] font-mono font-bold text-neutral-400 uppercase tracking-wider">Quality Score</div>
@@ -345,7 +343,7 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* Qualitative Snapshot Analysis */}
+                
                 <div className="bg-neutral-900/50 border border-neutral-800/80 rounded-xl p-4 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-mono font-bold text-neutral-400 uppercase tracking-wider">Analyst Thesis Snapshot</span>
@@ -374,7 +372,7 @@ const Dashboard = () => {
               </div>
             )}
 
-            {/* Agent Live Progress Monitor (visible during loading) */}
+            
             {loading && (
               <div className="bg-white rounded-3xl p-8 border border-gray-200/50 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-6">
                 <div className="flex items-center justify-between">
@@ -386,7 +384,7 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* Progress Logs */}
+                
                 <div className="space-y-4">
                   {stepsList.map((step, idx) => (
                     <div 
@@ -415,9 +413,9 @@ const Dashboard = () => {
             )}
           </div>
 
-          {/* Right Column: Research History Ledger & Stock Directory Tabs */}
+          
           <div className="lg:col-span-7 space-y-6">
-            {/* Tab Header */}
+            
             <div className="flex items-center justify-between border-b border-gray-200/60 pb-4">
               <div className="flex space-x-6">
                 <button
@@ -473,7 +471,7 @@ const Dashboard = () => {
               )}
             </div>
 
-            {/* TAB 1: Research Reports */}
+            
             {activeTab === 'reports' && (
               <div>
                 {reports.length === 0 ? (
@@ -538,7 +536,7 @@ const Dashboard = () => {
               </div>
             )}
 
-            {/* TAB 2: Listed Stocks & Instant Measurement Directory */}
+            
             {activeTab === 'directory' && (
               <div className="bg-white rounded-3xl p-6 border border-gray-200/50 shadow-sm space-y-4">
                 <div className="flex justify-between items-center pb-2 border-b border-gray-100">
