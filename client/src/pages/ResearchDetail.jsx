@@ -316,7 +316,55 @@ const ResearchDetail = () => {
     } catch { return null; }
   };
 
-  
+  const renderInline = (text) => {
+    if (!text) return null;
+    const TOKEN_RE = /(\*\*(.+?)\*\*|\[([^\]]+)\]\(([^)]+)\))/g;
+    const parts = [];
+    let lastIndex = 0;
+    let match;
+    let keyIdx = 0;
+
+    while ((match = TOKEN_RE.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(text.slice(lastIndex, match.index));
+      }
+
+      if (match[0].startsWith('**')) {
+        parts.push(
+          <strong key={keyIdx++} className="font-extrabold text-black">
+            {match[2]}
+          </strong>
+        );
+      } else {
+        const url = /^https?:\/\//i.test(match[4]) ? match[4] : `https://${match[4]}`;
+        parts.push(
+          <a
+            key={keyIdx++}
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              window.open(url, '_blank', 'noopener,noreferrer');
+            }}
+            style={{ pointerEvents: 'all', cursor: 'pointer', position: 'relative', zIndex: 10 }}
+            className="text-amber-600 hover:text-amber-800 underline underline-offset-2 font-bold transition-colors"
+          >
+            {match[3]}
+          </a>
+        );
+      }
+      lastIndex = TOKEN_RE.lastIndex;
+    }
+
+    if (lastIndex < text.length) {
+      parts.push(text.slice(lastIndex));
+    }
+
+    return parts.length > 0 ? parts : text;
+  };
+
   const formatReportContent = (markdown) => {
     if (!markdown) return null;
     const lines = markdown.split('\n');
@@ -328,12 +376,11 @@ const ResearchDetail = () => {
     lines.forEach((line, index) => {
       const trimmed = line.trim();
 
-      
       if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
         inTable = true;
         const parts = trimmed.split('|').map(s => s.trim()).filter((s, i, arr) => i > 0 && i < arr.length - 1);
-        
-        if (trimmed.includes('---')) {
+
+        if (trimmed.replace(/[\|\s\-:]/g, '') === '') {
           return;
         }
 
@@ -344,14 +391,15 @@ const ResearchDetail = () => {
         }
         return;
       } else if (inTable) {
-        
         elements.push(
           <div key={`table-${index}`} className="my-6 overflow-x-auto rounded-2xl border border-gray-200/60 shadow-sm bg-white">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-neutral-50">
                 <tr>
                   {tableHeaders.map((h, i) => (
-                    <th key={i} className="px-6 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">{h}</th>
+                    <th key={i} className="px-6 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                      {renderInline(h)}
+                    </th>
                   ))}
                 </tr>
               </thead>
@@ -359,7 +407,9 @@ const ResearchDetail = () => {
                 {tableRows.map((row, ri) => (
                   <tr key={ri} className="hover:bg-neutral-50/50 transition">
                     {row.map((cell, ci) => (
-                      <td key={ci} className="px-6 py-3.5 text-xs font-semibold text-gray-700 leading-relaxed">{cell}</td>
+                      <td key={ci} className="px-6 py-3.5 text-xs font-semibold text-gray-700 leading-relaxed">
+                        {renderInline(cell)}
+                      </td>
                     ))}
                   </tr>
                 ))}
@@ -373,55 +423,38 @@ const ResearchDetail = () => {
       }
 
       if (trimmed.startsWith('# ')) {
-        elements.push(<h1 key={index} className="text-2xl md:text-3xl font-extrabold text-black tracking-tight mt-8 mb-4 leading-tight">{trimmed.substring(2)}</h1>);
+        elements.push(
+          <h1 key={index} className="text-2xl md:text-3xl font-extrabold text-black tracking-tight mt-8 mb-4 leading-tight">
+            {renderInline(trimmed.substring(2))}
+          </h1>
+        );
       } else if (trimmed.startsWith('## ')) {
-        elements.push(<h2 key={index} className="text-lg md:text-xl font-extrabold text-black tracking-tight mt-8 mb-3 leading-tight border-b border-gray-200/60 pb-2">{trimmed.substring(3)}</h2>);
+        elements.push(
+          <h2 key={index} className="text-lg md:text-xl font-extrabold text-black tracking-tight mt-8 mb-3 leading-tight border-b border-gray-200/60 pb-2">
+            {renderInline(trimmed.substring(3))}
+          </h2>
+        );
       } else if (trimmed.startsWith('### ')) {
-        elements.push(<h3 key={index} className="text-sm md:text-base font-extrabold text-neutral-800 tracking-tight mt-6 mb-2 leading-tight">{trimmed.substring(4)}</h3>);
+        elements.push(
+          <h3 key={index} className="text-sm md:text-base font-extrabold text-neutral-800 tracking-tight mt-6 mb-2 leading-tight">
+            {renderInline(trimmed.substring(4))}
+          </h3>
+        );
       } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-        
-        let content = trimmed.substring(2);
-        const boldRegex = /\*\*(.*?)\*\*/g;
-        const matches = [...content.matchAll(boldRegex)];
-        let formattedContent = content;
-        
-        if (matches.length > 0) {
-          formattedContent = content.replace(/\*\*(.*?)\*\*/g, '$1');
-        }
-
         elements.push(
           <div key={index} className="flex items-start space-x-2.5 my-2.5 pl-2">
             <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-2 shrink-0" />
             <p className="text-xs text-gray-600 font-medium leading-relaxed">
-              {matches.length > 0 ? (
-                <>
-                  <span className="font-extrabold text-neutral-850">{matches[0][1]}</span>
-                  {content.substring(matches[0][0].length + content.indexOf(matches[0][0]))}
-                </>
-              ) : formattedContent}
+              {renderInline(trimmed.substring(2))}
             </p>
           </div>
         );
       } else if (trimmed) {
-        
-        let content = trimmed;
-        const boldRegex = /\*\*(.*?)\*\*/g;
-        const matches = [...content.matchAll(boldRegex)];
-        
-        if (matches.length > 0) {
-          elements.push(
-            <p key={index} className="text-xs text-gray-600 font-medium leading-relaxed my-3">
-              {content.split(/\*\*.*?\*\*/).map((segment, i) => (
-                <React.Fragment key={i}>
-                  {segment}
-                  {matches[i] && <span className="font-extrabold text-black">{matches[i][1]}</span>}
-                </React.Fragment>
-              ))}
-            </p>
-          );
-        } else {
-          elements.push(<p key={index} className="text-xs text-gray-600 font-medium leading-relaxed my-3">{trimmed}</p>);
-        }
+        elements.push(
+          <p key={index} className="text-xs text-gray-600 font-medium leading-relaxed my-3">
+            {renderInline(trimmed)}
+          </p>
+        );
       }
     });
 
@@ -432,7 +465,9 @@ const ResearchDetail = () => {
             <thead className="bg-neutral-50">
               <tr>
                 {tableHeaders.map((h, i) => (
-                  <th key={i} className="px-6 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">{h}</th>
+                  <th key={i} className="px-6 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                    {renderInline(h)}
+                  </th>
                 ))}
               </tr>
             </thead>
@@ -440,7 +475,9 @@ const ResearchDetail = () => {
               {tableRows.map((row, ri) => (
                 <tr key={ri} className="hover:bg-neutral-50/50 transition">
                   {row.map((cell, ci) => (
-                    <td key={ci} className="px-6 py-3.5 text-xs font-semibold text-gray-700 leading-relaxed">{cell}</td>
+                    <td key={ci} className="px-6 py-3.5 text-xs font-semibold text-gray-700 leading-relaxed">
+                      {renderInline(cell)}
+                    </td>
                   ))}
                 </tr>
               ))}
