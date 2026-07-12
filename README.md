@@ -1,124 +1,296 @@
-# 📈 Auditflow: AI-Powered Autonomous Investment Analyst
 
-An advanced, full-stack MERN application that implements an autonomous, traceable investment research agent. **Auditflow** uses a structured LangGraph state machine workflow to compile real-time financial stats, scrape market sentiment, query live stock charts, score investment confidence, and output formatted, audit-verified research reports.
+# AI Investment Research Agent
 
----
-
-## 💡 Engineering Intuition & Core Approach
-
-### The Problem with Black-Box AI
-Traditional LLM wrappers for financial research operate as "black boxes": they take a prompt, pull some search results, and output a recommendation. However, professional investors and developers cannot inspect **how** the final decision was reached, making it prone to hallucinations, outdated pricing, and unverified data.
-
-### My Approach: State Machines over Linear Scripts
-To solve this, I designed the core analysis engine using **LangGraph**. The execution is structured as a **State Graph (state machine)** rather than a linear execution script. 
-
-#### Why LangGraph?
-1. **Determinism & Control**: By partitioning the analysis into distinct, modular **Nodes** (`fetchFinancials` ➔ `fetchPrice` ➔ `fetchNews` ➔ `synthesizeReport` ➔ `review`), I ensure that the data-gathering is structured and isolated from potential LLM deviation.
-2. **Resilience**: If any API node fails (e.g. OpenAI or Tavily keys are missing/rate-limited), the state graph automatically synthesizes standard mock structures, ensuring the runtime continues seamlessly.
-3. **Traceability (Visual Audit Trail)**: Each node appends a logs step description and timestamp directly to the state's `auditTrail`. The frontend parses and prints this execution timeline to show the exact process history.
+> An AI-powered investment research platform built using the **MERN Stack**, **LangGraph.js**, and **LangChain.js**. The application researches a company, gathers financial and market information, and generates an explainable investment recommendation.
 
 ---
 
-## 🛠️ System Architecture & Data Flow
+# Overview
 
-```mermaid
-sequenceDiagram
-    participant User as React Frontend (Vite)
-    participant Server as Express Backend
-    participant DB as MongoDB / Cache
-    participant LangGraph as LangGraph Agent Graph
-    participant External as External APIs (Yahoo Finance / Tavily / OpenAI)
+The AI Investment Research Agent automates the first stage of investment research by collecting financial information, market sentiment, and company news before generating an AI-assisted recommendation.
 
-    User->>Server: POST /api/research { symbol: "ZOMATO" }
-    Server->>LangGraph: researchAgent.invoke({ symbol: "ZOMATO" })
-    
-    rect rgb(240, 240, 240)
-        Note over LangGraph, External: State Machine Nodes
-        LangGraph->>External: 1. fetchFinancialsNode (Alpha Vantage / Mock)
-        LangGraph->>External: 2. fetchPriceNode (Yahoo Finance Chart API)
-        LangGraph->>External: 3. fetchNewsNode (Tavily Search / Mock)
-        LangGraph->>LangGraph: 4. computeConfidence & Recommendation
-        LangGraph->>External: 5. synthesizeReportNode (ChatOpenAI / Mock)
-    end
-    
-    LangGraph-->>Server: Final State Object
-    Server->>DB: Save/Cache ResearchReport Document
-    Server-->>User: Created ResearchReport JSON
-    User->>User: Route to /research/:id & Render Detail Widgets
-```
+The generated report includes:
+
+- Company Overview
+- Current Stock Price
+- Financial Highlights
+- Market Sentiment
+- Key Opportunities
+- Potential Risks
+- Investment Recommendation (BUY / HOLD / SELL)
+- Confidence Score
+- AI-generated Reasoning
+- Sources Used
 
 ---
 
-## ✨ Features & Major Enhancements Implemented
+# Features
 
-### 1. Real-Time Yahoo Finance Price Fetcher
-* **No Key Required**: Bypasses paywalled stock APIs by querying Yahoo Finance's native chart endpoint directly, extracting live price, daily change, high/low limits, trading volume, and exchange details.
-* **Resilient Fallback**: Gracefully falls back to a simulated momentum tracker if the query times out or fails.
+## Authentication
+- User Signup & Login
+- Protected Routes
 
-### 2. Algorithmic Confidence & Decision Engine
-* Rather than asking the LLM to guess a confidence percentage, a rules-based deterministic parser calculates an exact score (0–100%) and recommendation (`BUY`, `HOLD`, `SELL`) based on:
-  * **P/E Ratio** vs historical benchmarks (~25% weight)
-  * **PEG Ratio** showing price-to-growth balance (~25% weight)
-  * **Profit Margins** indicating operational pricing power (~25% weight)
-  * **News Sentiment** balance (~25% weight)
-  * **Price Momentum** (daily percentage velocity)
+## AI Research
+- Company Research
+- Financial Analysis
+- Live Stock Price
+- News Analysis
+- AI Recommendation
+- Confidence Score
 
-### 3. Structured Investment Reasoning
-* Automatically organizes decisions into three interactive lists:
-  * **Why Invest**: Clear technical and sentiment catalysts.
-  * **When to Enter**: Measured advice (stop-losses, accumulation timing).
-  * **Key Risks**: Risk disclosures (high valuation, negative news sentiment).
+## Dashboard
+- Interactive Dashboard
+- Report History
+- Responsive UI
 
-### 4. Interactive Dashboard UI Widgets
-* **Animated Circular Gauge**: An SVG-animated progress ring displaying confidence scores matching the verdict color (Green = BUY, Yellow = HOLD, Red = SELL).
-* **Live Price Card**: Renders active stock statistics alongside a daily trading range slider.
-* **Keyboard-Navigable Autocomplete Input**: Provides a clean popular ticker dropdown suggestions list supporting Up/Down arrow selection, Escape close, and click-outside dismissals.
-
-### 5. Resilient Fallback Auth (Zero setup required)
-* Implemented a `flexibleAuth` middleware wrapper that attempts Clerk session token parsing, but falls back to decoding the Bearer JWT or using a local dev fallback if Server/Clerk variables aren't initialized. This ensures the app runs out-of-the-box in local environments.
+## Engineering
+- LangGraph Workflow
+- Modular Architecture
+- Graceful Error Handling
+- Production-ready Folder Structure
 
 ---
 
-## ⚡ Tech Stack
+# Tech Stack
 
-* **Frontend**: React (Vite), React Router v6, Tailwind CSS, Clerk (User Auth)
-* **Backend**: Node.js, Express, MongoDB (Mongoose), LangGraph.js, LangChain.js, Axios
-* **APIs**: Yahoo Finance, Tavily Search, Alpha Vantage, OpenAI GPT-4o-mini
+## Frontend
+- React (Vite)
+- Tailwind CSS
+- React Router
+- Axios
+
+## Backend
+- Node.js
+- Express.js
+- MongoDB
+- Mongoose
+
+## AI
+- LangChain.js
+- LangGraph.js
+- Google Gemini
+
+## APIs
+- Yahoo Finance
+- Tavily Search
 
 ---
 
-## 🚀 Getting Started
+# How to Run
 
-### 1. Installation
-Run the root helper script to install dependencies across the workspace:
+## Clone Repository
+
 ```bash
-npm run install-all
+git clone <repository-url>
+cd AI-Investment-Research-Agent
 ```
 
-### 2. Configuration
-Create a `.env` file in the `/server` directory:
+## Install Dependencies
+
+```bash
+npm install
+
+cd client
+npm install
+
+cd ../server
+npm install
+```
+
+## Configure Environment Variables
+
+### server/.env
+
 ```env
 PORT=5000
-MONGODB_URI=mongodb://127.0.0.1:27017/investment-agent
-CLIENT_URL=http://localhost:5173
+MONGODB_URI=your_mongodb_uri
 
-# Optional: Add keys to activate live AI/Search capabilities
-OPENAI_API_KEY=your_openai_api_key_here
-TAVILY_API_KEY=your_tavily_api_key_here
-ALPHA_VANTAGE_API_KEY=your_api_key_here
+GOOGLE_API_KEY=your_google_gemini_key
+TAVILY_API_KEY=your_tavily_key
+
+CLIENT_URL=http://localhost:5173
+JWT_SECRET=your_secret
 ```
 
-### 3. Launching
-Start the backend and frontend concurrently:
+### client/.env
+
+```env
+VITE_API_URL=http://localhost:5000
+```
+
+## Run Backend
+
 ```bash
+cd server
 npm run dev
 ```
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+## Run Frontend
+
+```bash
+cd client
+npm run dev
+```
+
+Open:
+
+```
+http://localhost:5173
+```
 
 ---
 
-## 🧠 Learning Patterns & Key Takeaways
+# How It Works
 
-1. **State Partitioning**: Designing structured graphs with `@langchain/langgraph` forced me to think of AI behavior like a deterministic state machine, keeping LLM output bound to verified input parameters.
-2. **CORS & Environment Synchronization**: Debugging preflight pre-CORS headers taught me the importance of aligning client and server environmental ports (`http://localhost:5173` vs `http://localhost:5174`) dynamically.
-3. **Resilient Middleware Patterns**: I learned to write robust middlewares that don't crash or redirect blindly (like standard Clerk `requireAuth()`), but instead fall back gracefully to support continuous developer flows when external services are unconfigured.
+1. User enters a company name.
+2. Backend creates a LangGraph workflow.
+3. Financial data is collected.
+4. Recent news is collected.
+5. AI analyzes the gathered information.
+6. Recommendation and confidence score are generated.
+7. Report is returned to the frontend.
+
+---
+
+# Architecture
+
+```text
+User
+  │
+React Frontend
+  │
+Express API
+  │
+LangGraph Workflow
+  ├── Financial Data
+  ├── News Search
+  └── AI Analysis
+  │
+PostgreSQL
+  │
+Frontend Report
+```
+
+---
+
+# Key Decisions & Trade-offs
+
+## Why LangGraph?
+
+LangGraph allows the application to break complex AI workflows into reusable nodes with shared state. This makes the system easier to maintain, debug, and extend.
+
+## Why Gemini?
+
+Gemini offers a generous free tier and strong reasoning performance, making it suitable for this assignment.
+
+## Why MongoDB?
+
+MongoDB stores semi-structured AI-generated reports efficiently without requiring a rigid relational schema.
+
+## Trade-offs
+
+Given the assignment timeline, I prioritized:
+
+- End-to-end AI workflow
+- Explainable recommendations
+- Clean architecture
+- Responsive UI
+
+Instead of:
+
+- Portfolio optimization
+- SEC filing analysis
+- Advanced forecasting
+- Multi-agent collaboration
+
+---
+
+# Example Runs
+
+## Apple
+
+Recommendation: **BUY**
+
+Confidence: **90%**
+
+Reason:
+- Strong financial performance
+- Positive market sentiment
+- Consistent profitability
+
+---
+
+## Tesla
+
+Recommendation: **HOLD**
+
+Confidence: **72%**
+
+Reason:
+- High valuation
+- Growth opportunities
+- Competitive market
+
+
+# What I Would Improve With More Time
+
+- Portfolio management
+- Historical trend analysis
+- SEC filing analysis
+- Multi-agent workflow
+- Redis caching
+- Report export (PDF)
+- Docker deployment
+- CI/CD pipeline
+- Automated testing
+
+---
+
+# AI Usage
+
+This project was developed with extensive assistance from an AI coding assistant.
+
+AI was used for:
+
+- Project planning
+- Learning LangChain.js
+- Learning LangGraph.js
+- Prompt engineering
+- Backend implementation
+- Debugging
+- Error resolution
+- Code refactoring
+- Documentation
+
+While I had prior experience with the MERN stack, LangChain.js and LangGraph.js were new to me. I used AI as a learning companion throughout the development process and independently integrated, tested, debugged, and refined the implementation.
+
+---
+
+# LLM Chat Session Transcript
+
+The complete AI development conversation is included with this submission.
+
+Included file:
+
+```
+LLM_Development_Transcript.md
+```
+
+This transcript documents the architectural discussions, implementation decisions, debugging process, and AI-assisted development workflow.
+
+---
+
+# Project Structure
+
+```text
+client/
+server/
+README.md
+LLM_Development_Transcript.md
+```
+
+---
+
+# Conclusion
+
+This project demonstrates how modern AI frameworks such as LangGraph.js and LangChain.js can be integrated with the MERN stack to build an explainable AI-powered investment research application. The focus was on clean architecture, modular design, transparency, and responsible AI-assisted software development.
