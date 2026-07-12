@@ -323,11 +323,11 @@ While I had prior experience with React, Node.js, Express.js, and PostgreSQL, La
 
 The complete AI-assisted development conversation is included with this submission.
 
-Included file:
+**Included file:**
 
-```text
-LLM_Development_Transcript.md
-```
+- [LLM_Development_Transcript.md](./LLM_Development_Transcript.md)
+
+
 
 The transcript documents:
 
