@@ -4,6 +4,11 @@ import { useAuth } from '@clerk/clerk-react';
 
 const ProtectedRoute = ({ children }) => {
   const { isLoaded, isSignedIn } = useAuth();
+  const isGuest = localStorage.getItem('auditflow_guest_mode') === 'true';
+
+  if (isGuest) {
+    return children;
+  }
 
   if (!isLoaded) {
     return (
