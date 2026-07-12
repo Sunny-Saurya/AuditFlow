@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
 
 const About = () => {
   return (
@@ -49,15 +50,29 @@ const About = () => {
           </nav>
 
           <div className="flex items-center space-x-4">
-            <Link to="/login" className="text-xs font-bold text-gray-700 hover:text-black transition-colors px-3 py-2">
-              Sign in
-            </Link>
-            <Link 
-              to="/signup" 
-              className="text-xs font-bold bg-white text-black border border-black hover:bg-black hover:text-white transition-all duration-300 px-5 py-2.5 rounded-full shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none"
-            >
-              Sign up
-            </Link>
+            <SignedIn>
+              <Link 
+                to="/dashboard" 
+                className="text-xs font-bold bg-black text-white hover:bg-neutral-800 transition-all duration-300 px-5 py-2.5 rounded-full shadow-md flex items-center space-x-1.5"
+              >
+                <span>Dashboard</span>
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </Link>
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
+            <SignedOut>
+              <Link to="/login" className="text-xs font-bold text-gray-700 hover:text-black transition-colors px-3 py-2">
+                Sign in
+              </Link>
+              <Link 
+                to="/signup" 
+                className="text-xs font-bold bg-white text-black border border-black hover:bg-black hover:text-white transition-all duration-300 px-5 py-2.5 rounded-full shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none"
+              >
+                Sign up
+              </Link>
+            </SignedOut>
           </div>
         </header>
 
